@@ -96,10 +96,16 @@ const SEED_REQUESTS = [
 // Reactive State Store with LocalStorage Persistence
 class StateStore {
   constructor() {
-    const saved = localStorage.getItem('clearpass_v4_state');
+    // Purge legacy caches to force updated official faculty names
+    ['clearpass_state', 'clearpass_v1_state', 'clearpass_v2_state', 'clearpass_v3_state', 'clearpass_v4_state'].forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+
+    const saved = localStorage.getItem('clearpass_v5_state');
     if (saved) {
       try {
         this.state = JSON.parse(saved);
+        this.syncSignatoriesWithRegistry();
       } catch (e) {
         this.state = this.getInitialState();
       }
@@ -108,6 +114,35 @@ class StateStore {
       this.save();
     }
     this.subscribers = [];
+  }
+
+  // Authoritative sync: Always keep officer names up to date with official registry
+  syncSignatoriesWithRegistry() {
+    if (!this.state || !this.state.requests) return;
+    this.state.requests.forEach(req => {
+      if (req.steps) {
+        req.steps.forEach(step => {
+          const desk = OFFICER_DESKS.find(d => d.id === step.deskId);
+          if (desk) {
+            if (step.deskId === 'library') step.officerName = `${desk.officerName} (${desk.roleTitle})`;
+            else if (step.deskId === 'hostel') step.officerName = `${desk.officerName} (${desk.roleTitle})`;
+            else if (step.deskId === 'accounts') step.officerName = desk.officerName;
+            else if (step.deskId === 'lab') step.officerName = `${desk.officerName} (Lab In-charge)`;
+            else if (step.deskId === 'hod') step.officerName = `${desk.officerName} (Prof & HOD)`;
+            else step.officerName = desk.officerName;
+          }
+        });
+      }
+    });
+
+    // If an officer is currently logged in, sync their name as well
+    if (this.state.currentRole === 'officer' && this.state.currentUser && this.state.currentUser.deskId) {
+      const activeDesk = OFFICER_DESKS.find(d => d.id === this.state.currentUser.deskId);
+      if (activeDesk) {
+        this.state.currentUser.name = activeDesk.officerName;
+        this.state.currentUser.roleTitle = activeDesk.roleTitle;
+      }
+    }
   }
 
   getInitialState() {
@@ -123,7 +158,8 @@ class StateStore {
   }
 
   save() {
-    localStorage.setItem('clearpass_v4_state', JSON.stringify(this.state));
+    this.syncSignatoriesWithRegistry();
+    localStorage.setItem('clearpass_v5_state', JSON.stringify(this.state));
     this.notify();
   }
 
