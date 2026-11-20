@@ -109,11 +109,11 @@ def init_db():
         
         # 5 clearance desks in exact prompt order: Library -> Hostel -> Accounts -> Lab -> HOD
         steps = [
-            (req_id, 1, "library", "Central Library", "Smt. Sunitha K (Chief Librarian)", "approved", "All borrowed books returned. No fine pending.", 0.0, now),
-            (req_id, 2, "hostel", "Campus Hostel Office", "Mr. Chandrashekar B (Hostel Warden)", "approved", "Room inventory cleared. Caution deposit verified.", 0.0, now),
+            (req_id, 1, "library", "Central Library", "Dr H Nayana (Chief Librarian)", "approved", "All borrowed books returned. No fine pending.", 0.0, now),
+            (req_id, 2, "hostel", "Campus Hostel Office", "Girish P (Hostel Warden)", "approved", "Room inventory cleared. Caution deposit verified.", 0.0, now),
             (req_id, 3, "accounts", "Accounts & Fee Section", "Accounts Officer - Desk 3", "pending", "Tuition fee ledger verification in progress.", 0.0, None),
-            (req_id, 4, "lab", "AIML Department Labs", "Prof. Manjunath R (Lab In-charge)", "pending", None, 0.0, None),
-            (req_id, 5, "hod", "HOD - Dept. of CSE (AIML)", "Dr. Paramesha K (Prof & HOD)", "pending", None, 0.0, None)
+            (req_id, 4, "lab", "AIML Department Labs", "Prof Rashmi K (Lab In-charge)", "pending", None, 0.0, None),
+            (req_id, 5, "hod", "HOD - Dept. of CSE (AIML)", "Dr Aditya CR (Prof & HOD)", "pending", None, 0.0, None)
         ]
         cursor.executemany("""
         INSERT INTO approval_steps (request_id, step_order, desk_id, desk_name, officer_name, status, remarks, dues_amount, action_timestamp)
@@ -129,11 +129,11 @@ def init_db():
         """, (req_id_done, "4VV24CI34", "Rajesh BR", "CSE (AIML)", "Bonafide Certificate", "Passport Application & AICTE Summer Internship", "approved", "2026-11-18 10:15:00", "2026-11-19 16:40:00", hash_digest, f"/verify/{hash_digest}"))
         
         steps_done = [
-            (req_id_done, 1, "library", "Central Library", "Smt. Sunitha K", "approved", "Cleared. Zero dues.", 0.0, "2026-11-18 11:20:00"),
-            (req_id_done, 2, "hostel", "Campus Hostel Office", "Mr. Chandrashekar B", "approved", "Day scholar - exempted.", 0.0, "2026-11-18 14:05:00"),
+            (req_id_done, 1, "library", "Central Library", "Dr H Nayana", "approved", "Cleared. Zero dues.", 0.0, "2026-11-18 11:20:00"),
+            (req_id_done, 2, "hostel", "Campus Hostel Office", "Girish P", "approved", "Day scholar - exempted.", 0.0, "2026-11-18 14:05:00"),
             (req_id_done, 3, "accounts", "Accounts & Fee Section", "Accounts Officer", "approved", "Tuition fee paid in full for Odd Sem 2026-27.", 0.0, "2026-11-19 09:30:00"),
-            (req_id_done, 4, "lab", "AIML Department Labs", "Prof. Manjunath R", "approved", "AI Lab record signed and hardware returned.", 0.0, "2026-11-19 14:10:00"),
-            (req_id_done, 5, "hod", "HOD - Dept. of CSE (AIML)", "Dr. Paramesha K", "approved", "Bonafide Certificate sanctioned for academic year 2026-27.", 0.0, "2026-11-19 16:40:00")
+            (req_id_done, 4, "lab", "AIML Department Labs", "Prof Rashmi K", "approved", "AI Lab record signed and hardware returned.", 0.0, "2026-11-19 14:10:00"),
+            (req_id_done, 5, "hod", "HOD - Dept. of CSE (AIML)", "Dr Aditya CR", "approved", "Bonafide Certificate sanctioned for academic year 2026-27.", 0.0, "2026-11-19 16:40:00")
         ]
         cursor.executemany("""
         INSERT INTO approval_steps (request_id, step_order, desk_id, desk_name, officer_name, status, remarks, dues_amount, action_timestamp)
@@ -216,11 +216,11 @@ def create_request():
     
     # Generate sequential desk approval workflow (Library -> Hostel -> Accounts -> Lab -> HOD)
     default_desks = [
-        (1, "library", "Central Library", "Smt. Sunitha K (Librarian)"),
-        (2, "hostel", "Campus Hostel Office", "Mr. Chandrashekar B (Hostel Warden)"),
+        (1, "library", "Central Library", "Dr H Nayana (Chief Librarian)"),
+        (2, "hostel", "Campus Hostel Office", "Girish P (Hostel Warden)"),
         (3, "accounts", "Accounts & Fee Section", "Accounts Officer (Fee Desk)"),
-        (4, "lab", "AIML Department Labs", "Prof. Manjunath R (Lab In-charge)"),
-        (5, "hod", "HOD - Dept. of CSE (AIML)", "Dr. Paramesha K (Prof & HOD)")
+        (4, "lab", "AIML Department Labs", "Prof Rashmi K (Lab In-charge)"),
+        (5, "hod", "HOD - Dept. of CSE (AIML)", "Dr Aditya CR (Prof & HOD)")
     ]
     
     for order, desk_id, desk_name, officer in default_desks:

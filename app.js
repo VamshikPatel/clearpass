@@ -13,11 +13,11 @@ const STUDENTS = [
 
 // Official Clearance Desks & Signatories (Monospace Architectural Tags, Zero Emojis)
 const OFFICER_DESKS = [
-  { id: 'library', name: 'Central Library', officerName: 'Smt. Sunitha K', roleTitle: 'Chief Librarian', tag: '[DESK 01 // LIB]', pin: 'vvce#lib', defaultRemark: 'All borrowed textbooks returned intact. Zero library fine.' },
-  { id: 'hostel', name: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', roleTitle: 'Hostel Warden', tag: '[DESK 02 // HOSTEL]', pin: 'vvce#hostel', defaultRemark: 'Room inventory cleared. Caution deposit verified.' },
+  { id: 'library', name: 'Central Library', officerName: 'Dr H Nayana', roleTitle: 'Chief Librarian', tag: '[DESK 01 // LIB]', pin: 'vvce#lib', defaultRemark: 'All borrowed textbooks returned intact. Zero library fine.' },
+  { id: 'hostel', name: 'Campus Hostel Office', officerName: 'Girish P', roleTitle: 'Hostel Warden', tag: '[DESK 02 // HOSTEL]', pin: 'vvce#hostel', defaultRemark: 'Room inventory cleared. Caution deposit verified.' },
   { id: 'accounts', name: 'Accounts & Fee Section', officerName: 'Accounts Officer (Desk 3)', roleTitle: 'Fee Section Officer', tag: '[DESK 03 // ACC]', pin: 'vvce#acc', defaultRemark: 'Tuition fee cleared in full for Odd Sem 2026-27.' },
-  { id: 'lab', name: 'AIML Department Labs', officerName: 'Prof. Manjunath R', roleTitle: 'Lab In-Charge', tag: '[DESK 04 // LAB]', pin: 'vvce#lab', defaultRemark: 'AI Lab record signed. GPU kit returned.' },
-  { id: 'hod', name: 'HOD Office (AIML)', officerName: 'Dr. Paramesha K', roleTitle: 'Professor & HOD', tag: '[DESK 05 // HOD]', pin: 'vvce#hod', defaultRemark: 'Academic clearance sanctioned for academic year 2026-27.' }
+  { id: 'lab', name: 'AIML Department Labs', officerName: 'Prof Rashmi K', roleTitle: 'Lab In-Charge', tag: '[DESK 04 // LAB]', pin: 'vvce#lab', defaultRemark: 'AI Lab record signed. GPU kit returned.' },
+  { id: 'hod', name: 'HOD Office (AIML)', officerName: 'Dr Aditya CR', roleTitle: 'Professor & HOD', tag: '[DESK 05 // HOD]', pin: 'vvce#hod', defaultRemark: 'Academic clearance sanctioned for academic year 2026-27.' }
 ];
 
 // Pre-seeded Individual Student Requests (Distinct, User-Isolated)
@@ -38,11 +38,11 @@ const SEED_REQUESTS = [
     activeDesk: 'accounts',
     elapsedWait: '2H 14M',
     steps: [
-      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K (Chief Librarian)', status: 'completed', remarks: 'All 3 technical textbooks returned intact. Zero library fine.', timestamp: 'NOV 20 · 09:45', slaHours: 24 },
-      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B (Hostel Warden)', status: 'completed', remarks: 'Day scholar exempted / room inventory cleared.', timestamp: 'NOV 20 · 10:12', slaHours: 48 },
+      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Dr H Nayana (Chief Librarian)', status: 'completed', remarks: 'All 3 technical textbooks returned intact. Zero library fine.', timestamp: 'NOV 20 · 09:45', slaHours: 24 },
+      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Girish P (Hostel Warden)', status: 'completed', remarks: 'Day scholar exempted / room inventory cleared.', timestamp: 'NOV 20 · 10:12', slaHours: 48 },
       { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer (Desk 3)', status: 'active', remarks: 'Tuition fee ledger verification in progress.', timestamp: null, slaHours: 24 },
-      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R (Lab In-charge)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 },
-      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K (Prof & HOD)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 }
+      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof Rashmi K (Lab In-charge)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 },
+      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr Aditya CR (Prof & HOD)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 }
     ]
   },
   // 2. Rajesh BR - Completed & Approved Bonafide Certificate
@@ -61,11 +61,11 @@ const SEED_REQUESTS = [
     activeDesk: null,
     elapsedWait: 'COMPLETED IN 4.2H',
     steps: [
-      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K', status: 'completed', remarks: 'Cleared. Zero dues.', timestamp: 'NOV 18 · 11:20', slaHours: 24 },
-      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', status: 'completed', remarks: 'Day scholar - exempted.', timestamp: 'NOV 18 · 14:05', slaHours: 48 },
+      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Dr H Nayana', status: 'completed', remarks: 'Cleared. Zero dues.', timestamp: 'NOV 18 · 11:20', slaHours: 24 },
+      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Girish P', status: 'completed', remarks: 'Day scholar - exempted.', timestamp: 'NOV 18 · 14:05', slaHours: 48 },
       { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer', status: 'completed', remarks: 'Tuition fee cleared in full for Odd Sem 2026-27.', timestamp: 'NOV 19 · 09:30', slaHours: 24 },
-      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R', status: 'completed', remarks: 'AI Lab record verified.', timestamp: 'NOV 19 · 14:10', slaHours: 24 },
-      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K', status: 'completed', remarks: 'Bonafide sanctioned for academic year 2026-27.', timestamp: 'NOV 19 · 16:40', slaHours: 24 }
+      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof Rashmi K', status: 'completed', remarks: 'AI Lab record verified.', timestamp: 'NOV 19 · 14:10', slaHours: 24 },
+      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr Aditya CR', status: 'completed', remarks: 'Bonafide sanctioned for academic year 2026-27.', timestamp: 'NOV 19 · 16:40', slaHours: 24 }
     ]
   },
   // 3. RP Jeetender Singh - Completed & Approved Laboratory Clearance
@@ -84,11 +84,11 @@ const SEED_REQUESTS = [
     activeDesk: null,
     elapsedWait: 'COMPLETED IN 3.8H',
     steps: [
-      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K', status: 'completed', remarks: 'Cleared.', timestamp: 'NOV 15 · 14:30', slaHours: 24 },
-      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', status: 'completed', remarks: 'Hostel clearance recorded.', timestamp: 'NOV 15 · 15:45', slaHours: 48 },
+      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Dr H Nayana', status: 'completed', remarks: 'Cleared.', timestamp: 'NOV 15 · 14:30', slaHours: 24 },
+      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Girish P', status: 'completed', remarks: 'Hostel clearance recorded.', timestamp: 'NOV 15 · 15:45', slaHours: 48 },
       { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer', status: 'completed', remarks: 'Lab fees accounted.', timestamp: 'NOV 16 · 09:20', slaHours: 24 },
-      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R', status: 'completed', remarks: 'Mini-project benchmarks verified. GPU kits returned.', timestamp: 'NOV 16 · 10:45', slaHours: 24 },
-      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K', status: 'completed', remarks: 'Approved.', timestamp: 'NOV 16 · 11:30', slaHours: 24 }
+      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof Rashmi K', status: 'completed', remarks: 'Mini-project benchmarks verified. GPU kits returned.', timestamp: 'NOV 16 · 10:45', slaHours: 24 },
+      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr Aditya CR', status: 'completed', remarks: 'Approved.', timestamp: 'NOV 16 · 11:30', slaHours: 24 }
     ]
   }
 ];
@@ -258,11 +258,11 @@ class StateStore {
       activeDesk: 'library',
       elapsedWait: 'JUST NOW',
       steps: [
-        { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K (Chief Librarian)', status: 'active', remarks: null, timestamp: null, slaHours: 24 },
-        { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B (Hostel Warden)', status: 'pending', remarks: null, timestamp: null, slaHours: 48 },
+        { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Dr H Nayana (Chief Librarian)', status: 'active', remarks: null, timestamp: null, slaHours: 24 },
+        { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Girish P (Hostel Warden)', status: 'pending', remarks: null, timestamp: null, slaHours: 48 },
         { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer (Desk 3)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 },
-        { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R (Lab In-charge)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 },
-        { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K (Prof & HOD)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 }
+        { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof Rashmi K (Lab In-charge)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 },
+        { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr Aditya CR (Prof & HOD)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 }
       ]
     };
 

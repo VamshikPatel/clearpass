@@ -74,11 +74,11 @@ git push origin main
 - **RP Jeetender Singh:** `4VV24CI132` | PIN: `vvce@2026` *(Approved Lab Clearance)*
 
 ### Department Desks (Officer Portal):
-- **Central Library:** `library` | Access Key: `vvce#lib`
-- **Campus Hostel:** `hostel` | Access Key: `vvce#hostel`
-- **Accounts & Fee Section:** `accounts` | Access Key: `vvce#acc`
-- **AIML Department Labs:** `lab` | Access Key: `vvce#lab`
-- **HOD Office (AIML):** `hod` | Access Key: `vvce#hod`
+- **Central Library:** `library` (Dr H Nayana, Chief Librarian) | Access Key: `vvce#lib`
+- **Campus Hostel:** `hostel` (Girish P, Hostel Warden) | Access Key: `vvce#hostel`
+- **Accounts & Fee Section:** `accounts` (Accounts Officer - Desk 3) | Access Key: `vvce#acc`
+- **AIML Department Labs:** `lab` (Prof Rashmi K, Lab In-Charge) | Access Key: `vvce#lab`
+- **HOD Office (AIML):** `hod` (Dr Aditya CR, Professor & HOD) | Access Key: `vvce#hod`
 - *(General Faculty PIN: `vvce#faculty`)*
 
 ### Institutional Admin:

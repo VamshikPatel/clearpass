@@ -31,11 +31,11 @@ mongoose.connect(MONGODB_URI)
 
 // Default 5-Desk Workflow Sequence: LIBRARY -> HOSTEL -> ACCOUNTS -> LAB -> HOD
 const DEFAULT_DESKS = [
-  { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K (Chief Librarian)', slaHours: 24 },
-  { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B (Hostel Warden)', slaHours: 48 },
+  { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Dr H Nayana (Chief Librarian)', slaHours: 24 },
+  { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Girish P (Hostel Warden)', slaHours: 48 },
   { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer (Desk 3)', slaHours: 24 },
-  { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R (Lab In-charge)', slaHours: 24 },
-  { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K (Prof & HOD)', slaHours: 24 }
+  { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof Rashmi K (Lab In-charge)', slaHours: 24 },
+  { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr Aditya CR (Prof & HOD)', slaHours: 24 }
 ];
 
 // Routes
