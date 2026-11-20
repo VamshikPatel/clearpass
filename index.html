@@ -30,22 +30,14 @@
       </div>
     </div>
 
-    <!-- Motion.dev Shared Layout Spring Navigator -->
+    <!-- Motion.dev Dynamic Role-Based Navigator -->
     <nav class="route-navigator" id="route-navigator">
-      <div class="nav-active-pill" id="nav-active-slider"></div>
-      <button class="nav-pill-btn" data-view="login">01 // LOGIN</button>
-      <button class="nav-pill-btn active" data-view="student">02 // STUDENT TRACKER</button>
-      <button class="nav-pill-btn" data-view="officer">03 // OFFICER LEDGER</button>
-      <button class="nav-pill-btn" data-view="admin">04 // ADMIN AUDIT</button>
-      <button class="nav-pill-btn" data-view="verify">05 // VERIFY ARTIFACT</button>
+      <!-- Injected dynamically by app.js renderTopNav() -->
     </nav>
 
     <div class="nav-right-actions">
-      <span class="role-tag-badge" id="nav-role-badge">STUDENT: VAMSHIK PATELA ES</span>
-      <button class="review-badge-btn" id="btn-review2-compliance">
-        <span style="color: var(--accent-volt);">●</span>
-        <span>REV-02 // 20 NOV 2026</span>
-      </button>
+      <span class="role-tag-badge" id="nav-role-badge"></span>
+      <div id="nav-auth-actions"></div>
     </div>
   </header>
 
@@ -55,7 +47,7 @@
     <!-- ====================================================================
          VIEW A: LANDING & ROLE-BASED LOGIN (/login)
          ==================================================================== -->
-    <section class="view-section" id="view-login">
+    <section class="view-section active" id="view-login">
       <div class="landing-split-grid">
         <!-- Editorial Left Pane -->
         <div class="landing-editorial-pane">
@@ -102,39 +94,14 @@
             <button class="role-tab-btn" data-role="admin">Admin</button>
           </div>
 
-          <!-- Student Profile Presets -->
-          <div class="form-field-group">
-            <span class="field-label">Student Dossier Selection</span>
-            <div class="quick-dossier-list">
-              <div class="dossier-card selected" onclick="window.clearPassApp.store?.setRole('student', '4VV24CI175'); window.clearPassApp.store?.setView('student');">
-                <div>
-                  <div class="dossier-name">Vamshik Patela ES</div>
-                  <div class="mono-label" style="font-size: 10px;">CSE (AIML) · SEM 05 · SEC C</div>
-                </div>
-                <div class="dossier-usn">4VV24CI175</div>
-              </div>
-
-              <div class="dossier-card" onclick="window.clearPassApp.store?.setRole('student', '4VV24CI34'); window.clearPassApp.store?.setView('student');">
-                <div>
-                  <div class="dossier-name">Rajesh BR</div>
-                  <div class="mono-label" style="font-size: 10px;">CSE (AIML) · SEM 05 · SEC A</div>
-                </div>
-                <div class="dossier-usn">4VV24CI34</div>
-              </div>
-
-              <div class="dossier-card" onclick="window.clearPassApp.store?.setRole('student', '4VV24CI132'); window.clearPassApp.store?.setView('student');">
-                <div>
-                  <div class="dossier-name">RP Jeetender Singh</div>
-                  <div class="mono-label" style="font-size: 10px;">CSE (AIML) · SEM 05 · SEC B</div>
-                </div>
-                <div class="dossier-usn">4VV24CI132</div>
-              </div>
-            </div>
+          <!-- Dynamic Credential List (Students vs 5 Officer Desks vs Admin) -->
+          <div class="form-field-group" id="login-credential-dynamic-container">
+            <!-- Injected dynamically by app.js renderLoginPane() -->
           </div>
 
           <div style="display: flex; gap: 12px; margin-top: 12px;">
-            <button class="btn-volt" style="width: 100%;" onclick="window.clearPassApp.store?.setView('student')">
-              ENTER CLEARANCE PROTOCOL →
+            <button class="btn-volt" id="btn-login-cta" style="width: 100%;">
+              ENTER CLEARANCE PROTOCOL ➔
             </button>
           </div>
         </div>
@@ -144,7 +111,7 @@
     <!-- ====================================================================
          VIEW B: STUDENT DASHBOARD & LIVE ARCHITECTURAL TRACKER (/student)
          ==================================================================== -->
-    <section class="view-section active" id="view-student">
+    <section class="view-section" id="view-student">
       <!-- Masthead -->
       <div class="student-masthead">
         <div class="student-meta-strip">
@@ -171,15 +138,15 @@
       <div class="officer-control-strip">
         <div>
           <span class="mono-label">FACULTY & DESK LEDGER</span>
-          <h2 style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em;">Department Clearance Queue</h2>
+          <h2 id="officer-desk-header-title" style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em;">Department Clearance Queue</h2>
         </div>
 
         <!-- Desk Switcher Tabs -->
         <div class="desk-filter-group" id="desk-filter-group">
           <button class="desk-filter-pill" data-desk="all">ALL DESKS</button>
-          <button class="desk-filter-pill" data-desk="library">LIBRARY</button>
+          <button class="desk-filter-pill active" data-desk="library">LIBRARY</button>
           <button class="desk-filter-pill" data-desk="hostel">HOSTEL</button>
-          <button class="desk-filter-pill active" data-desk="accounts">ACCOUNTS</button>
+          <button class="desk-filter-pill" data-desk="accounts">ACCOUNTS</button>
           <button class="desk-filter-pill" data-desk="lab">LAB</button>
           <button class="desk-filter-pill" data-desk="hod">HOD</button>
         </div>
@@ -373,7 +340,7 @@
 
         <div class="modal-footer-a24">
           <button type="button" class="btn-stark modal-close-trigger">DISCARD</button>
-          <button type="submit" class="btn-volt">INITIATE CLEARANCE PROTOCOL →</button>
+          <button type="submit" class="btn-volt">INITIATE CLEARANCE PROTOCOL ➔</button>
         </div>
       </form>
     </div>

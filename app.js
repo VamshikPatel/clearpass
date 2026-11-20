@@ -1,172 +1,132 @@
 /**
  * ClearPass — Motion.dev × A24 Front-End Engine
- * Digital No-Dues & Certificate Clearance Protocol with QR Verification
+ * Strict Role-Based Access Control (RBAC) & Sequential Clearance State Machine
  * Vidyavardhaka College of Engineering (VVCE), Mysuru
  */
 
-// Initial Seed Data with Verified VVCE Team & Sequential Desks
-const INITIAL_STATE = {
-  currentView: 'student', // 'login', 'student', 'officer', 'admin', 'verify'
-  currentRole: 'student', // 'student', 'officer', 'admin'
-  currentUser: {
-    name: 'Vamshik Patela ES',
+// Official Institutional Data
+const STUDENTS = [
+  { usn: '4VV24CI175', name: 'Vamshik Patela ES', dept: 'CSE (AIML)', sem: '05', sec: 'C', email: 'vamshik.24ci175@vvce.ac.in' },
+  { usn: '4VV24CI34', name: 'Rajesh BR', dept: 'CSE (AIML)', sem: '05', sec: 'A', email: 'rajesh.24ci34@vvce.ac.in' },
+  { usn: '4VV24CI132', name: 'RP Jeetender Singh', dept: 'CSE (AIML)', sem: '05', sec: 'B', email: 'jeetender.24ci132@vvce.ac.in' }
+];
+
+const OFFICER_DESKS = [
+  { id: 'library', name: 'Central Library', officerName: 'Smt. Sunitha K', roleTitle: 'Chief Librarian', icon: '📚', defaultRemark: 'All borrowed textbooks returned intact. Zero library fine.' },
+  { id: 'hostel', name: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', roleTitle: 'Hostel Warden', icon: '🏢', defaultRemark: 'Room inventory cleared. Caution deposit verified.' },
+  { id: 'accounts', name: 'Accounts & Fee Section', officerName: 'Accounts Officer (Desk 3)', roleTitle: 'Fee Section Officer', icon: '💳', defaultRemark: 'Tuition fee cleared in full for Odd Sem 2026-27.' },
+  { id: 'lab', name: 'AIML Department Labs', officerName: 'Prof. Manjunath R', roleTitle: 'Lab In-Charge', icon: '🔬', defaultRemark: 'AI Lab record signed. GPU kit returned.' },
+  { id: 'hod', name: 'HOD Office (AIML)', officerName: 'Dr. Paramesha K', roleTitle: 'Professor & HOD', icon: '🎓', defaultRemark: 'Academic clearance sanctioned for academic year 2026-27.' }
+];
+
+// Seed Requests with Sequential Chain: LIBRARY -> HOSTEL -> ACCOUNTS -> LAB -> HOD
+const SEED_REQUESTS = [
+  {
+    id: 'CP-2026-0842',
     usn: '4VV24CI175',
-    dept: 'Dept. of CSE (AI & ML)',
+    studentName: 'Vamshik Patela ES',
+    dept: 'CSE (AIML)',
     sem: '05',
-    sec: 'C',
-    email: 'vamshik.24ci175@vvce.ac.in'
+    type: 'Semester No-Dues Clearance',
+    purpose: 'End-Term Examination Hall Ticket Eligibility & Lab Clearance',
+    status: 'in_progress', // 'in_progress', 'approved', 'rejected', 'action_required'
+    createdAt: '2026-11-20 09:15:00',
+    updatedAt: '2026-11-20 10:20:00',
+    certificateHash: null,
+    activeDesk: 'accounts',
+    elapsedWait: '2H 14M',
+    steps: [
+      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K (Chief Librarian)', status: 'completed', remarks: 'All 3 technical textbooks returned intact. Zero library fine.', timestamp: 'NOV 20 · 09:45', slaHours: 24 },
+      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B (Hostel Warden)', status: 'completed', remarks: 'Day scholar exempted / room inventory cleared.', timestamp: 'NOV 20 · 10:12', slaHours: 48 },
+      { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer (Desk 3)', status: 'active', remarks: 'Tuition fee ledger verification in progress.', timestamp: null, slaHours: 24 },
+      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R (Lab In-charge)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 },
+      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K (Prof & HOD)', status: 'pending', remarks: null, timestamp: null, slaHours: 24 }
+    ]
   },
-  currentOfficerDesk: 'accounts', // 'library', 'hostel', 'accounts', 'lab', 'hod'
-  selectedVerifyHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-  
-  students: [
-    { usn: '4VV24CI175', name: 'Vamshik Patela ES', dept: 'CSE (AIML)', sem: '05', sec: 'C', email: 'vamshik.24ci175@vvce.ac.in' },
-    { usn: '4VV24CI34', name: 'Rajesh BR', dept: 'CSE (AIML)', sem: '05', sec: 'A', email: 'rajesh.24ci34@vvce.ac.in' },
-    { usn: '4VV24CI132', name: 'RP Jeetender Singh', dept: 'CSE (AIML)', sem: '05', sec: 'B', email: 'jeetender.24ci132@vvce.ac.in' },
-    { usn: '4VV23CS089', name: 'Ananya Sharma', dept: 'CSE', sem: '07', sec: 'A', email: 'ananya.23cs089@vvce.ac.in' }
-  ],
+  {
+    id: 'CP-2026-0719',
+    usn: '4VV24CI34',
+    studentName: 'Rajesh BR',
+    dept: 'CSE (AIML)',
+    sem: '05',
+    type: 'Bonafide Certificate',
+    purpose: 'Passport Application & AICTE Sponsored Summer Internship Verification',
+    status: 'approved',
+    createdAt: '2026-11-18 10:15:00',
+    updatedAt: '2026-11-19 16:40:00',
+    certificateHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    activeDesk: null,
+    elapsedWait: 'COMPLETED IN 4.2H',
+    steps: [
+      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K', status: 'completed', remarks: 'Cleared. Zero dues.', timestamp: 'NOV 18 · 11:20', slaHours: 24 },
+      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', status: 'completed', remarks: 'Day scholar - exempted.', timestamp: 'NOV 18 · 14:05', slaHours: 48 },
+      { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer', status: 'completed', remarks: 'Tuition fee cleared in full for Odd Sem 2026-27.', timestamp: 'NOV 19 · 09:30', slaHours: 24 },
+      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R', status: 'completed', remarks: 'AI Lab record verified.', timestamp: 'NOV 19 · 14:10', slaHours: 24 },
+      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K', status: 'completed', remarks: 'Bonafide sanctioned for academic year 2026-27.', timestamp: 'NOV 19 · 16:40', slaHours: 24 }
+    ]
+  },
+  {
+    id: 'CP-2026-0690',
+    usn: '4VV24CI132',
+    studentName: 'RP Jeetender Singh',
+    dept: 'CSE (AIML)',
+    sem: '05',
+    type: 'Laboratory Course Clearance',
+    purpose: 'Deep Learning & Computer Vision GPU Lab Course Sign-off',
+    status: 'approved',
+    createdAt: '2026-11-15 14:00:00',
+    updatedAt: '2026-11-16 11:30:00',
+    certificateHash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
+    activeDesk: null,
+    elapsedWait: 'COMPLETED IN 3.8H',
+    steps: [
+      { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K', status: 'completed', remarks: 'Cleared.', timestamp: 'NOV 15 · 14:30', slaHours: 24 },
+      { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', status: 'completed', remarks: 'Hostel clearance recorded.', timestamp: 'NOV 15 · 15:45', slaHours: 48 },
+      { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer', status: 'completed', remarks: 'Lab fees accounted.', timestamp: 'NOV 16 · 09:20', slaHours: 24 },
+      { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R', status: 'completed', remarks: 'Mini-project benchmarks verified. GPU kits returned.', timestamp: 'NOV 16 · 10:45', slaHours: 24 },
+      { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K', status: 'completed', remarks: 'Approved.', timestamp: 'NOV 16 · 11:30', slaHours: 24 }
+    ]
+  }
+];
 
-  // Requests Seed Data (Exact Sequential Chain: LIBRARY -> HOSTEL -> ACCOUNTS -> LAB -> HOD)
-  requests: [
-    {
-      id: 'CP-2026-0842',
-      usn: '4VV24CI175',
-      studentName: 'Vamshik Patela ES',
-      dept: 'CSE (AIML)',
-      sem: '05',
-      type: 'Semester No-Dues Clearance',
-      purpose: 'End-Term Examination Hall Ticket Eligibility & Lab Clearance',
-      status: 'in_progress', // 'in_progress', 'approved', 'rejected', 'action_required'
-      createdAt: '2026-11-20 09:15:00',
-      updatedAt: '2026-11-20 10:20:00',
-      certificateHash: null,
-      activeDesk: 'accounts',
-      elapsedWait: '2H 14M',
-      steps: [
-        {
-          order: 1,
-          deskId: 'library',
-          deskName: 'Library',
-          fullName: 'Central Library',
-          officerName: 'Smt. Sunitha K (Chief Librarian)',
-          status: 'completed',
-          remarks: 'All 3 technical textbooks returned intact. Zero library fine.',
-          timestamp: 'NOV 20 · 09:45',
-          slaHours: 24
-        },
-        {
-          order: 2,
-          deskId: 'hostel',
-          deskName: 'Hostel',
-          fullName: 'Campus Hostel Office',
-          officerName: 'Mr. Chandrashekar B (Hostel Warden)',
-          status: 'completed',
-          remarks: 'Day scholar exempted / room inventory cleared.',
-          timestamp: 'NOV 20 · 10:12',
-          slaHours: 48
-        },
-        {
-          order: 3,
-          deskId: 'accounts',
-          deskName: 'Accounts',
-          fullName: 'Accounts & Fee Section',
-          officerName: 'Accounts Officer (Desk 3)',
-          status: 'active',
-          remarks: 'Tuition fee ledger verification in progress.',
-          timestamp: null,
-          slaHours: 24
-        },
-        {
-          order: 4,
-          deskId: 'lab',
-          deskName: 'Lab',
-          fullName: 'AIML Department Labs',
-          officerName: 'Prof. Manjunath R (Lab In-charge)',
-          status: 'pending',
-          remarks: null,
-          timestamp: null,
-          slaHours: 24
-        },
-        {
-          order: 5,
-          deskId: 'hod',
-          deskName: 'HOD',
-          fullName: 'HOD - Dept. of CSE (AIML)',
-          officerName: 'Dr. Paramesha K (Prof & HOD)',
-          status: 'pending',
-          remarks: null,
-          timestamp: null,
-          slaHours: 24
-        }
-      ]
-    },
-    {
-      id: 'CP-2026-0719',
-      usn: '4VV24CI34',
-      studentName: 'Rajesh BR',
-      dept: 'CSE (AIML)',
-      sem: '05',
-      type: 'Bonafide Certificate',
-      purpose: 'Passport Application & AICTE Sponsored Summer Internship Verification',
-      status: 'approved',
-      createdAt: '2026-11-18 10:15:00',
-      updatedAt: '2026-11-19 16:40:00',
-      certificateHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      activeDesk: null,
-      elapsedWait: 'COMPLETED IN 4.2H',
-      steps: [
-        { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K', status: 'completed', remarks: 'Cleared. Zero dues.', timestamp: 'NOV 18 · 11:20', slaHours: 24 },
-        { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', status: 'completed', remarks: 'Day scholar - exempted.', timestamp: 'NOV 18 · 14:05', slaHours: 48 },
-        { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer', status: 'completed', remarks: 'Tuition fee cleared in full for Odd Sem 2026-27.', timestamp: 'NOV 19 · 09:30', slaHours: 24 },
-        { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R', status: 'completed', remarks: 'AI Lab record verified.', timestamp: 'NOV 19 · 14:10', slaHours: 24 },
-        { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K', status: 'completed', remarks: 'Bonafide sanctioned for academic year 2026-27.', timestamp: 'NOV 19 · 16:40', slaHours: 24 }
-      ]
-    },
-    {
-      id: 'CP-2026-0690',
-      usn: '4VV24CI132',
-      studentName: 'RP Jeetender Singh',
-      dept: 'CSE (AIML)',
-      sem: '05',
-      type: 'Laboratory Course Clearance',
-      purpose: 'Deep Learning & Computer Vision GPU Lab Course Sign-off',
-      status: 'approved',
-      createdAt: '2026-11-15 14:00:00',
-      updatedAt: '2026-11-16 11:30:00',
-      certificateHash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4',
-      activeDesk: null,
-      elapsedWait: 'COMPLETED IN 3.8H',
-      steps: [
-        { order: 1, deskId: 'library', deskName: 'Library', fullName: 'Central Library', officerName: 'Smt. Sunitha K', status: 'completed', remarks: 'Cleared.', timestamp: 'NOV 15 · 14:30', slaHours: 24 },
-        { order: 2, deskId: 'hostel', deskName: 'Hostel', fullName: 'Campus Hostel Office', officerName: 'Mr. Chandrashekar B', status: 'completed', remarks: 'Hostel clearance recorded.', timestamp: 'NOV 15 · 15:45', slaHours: 48 },
-        { order: 3, deskId: 'accounts', deskName: 'Accounts', fullName: 'Accounts & Fee Section', officerName: 'Accounts Officer', status: 'completed', remarks: 'Lab fees accounted.', timestamp: 'NOV 16 · 09:20', slaHours: 24 },
-        { order: 4, deskId: 'lab', deskName: 'Lab', fullName: 'AIML Department Labs', officerName: 'Prof. Manjunath R', status: 'completed', remarks: 'Mini-project benchmarks verified. GPU kits returned.', timestamp: 'NOV 16 · 10:45', slaHours: 24 },
-        { order: 5, deskId: 'hod', deskName: 'HOD', fullName: 'HOD - Dept. of CSE (AIML)', officerName: 'Dr. Paramesha K', status: 'completed', remarks: 'Approved.', timestamp: 'NOV 16 · 11:30', slaHours: 24 }
-      ]
-    }
-  ]
-};
-
-// Store with LocalStorage & Reactive State
+// Reactive State Store with LocalStorage Persistence
 class StateStore {
   constructor() {
-    const saved = localStorage.getItem('clearpass_a24_state');
+    const saved = localStorage.getItem('clearpass_v3_state');
     if (saved) {
       try {
         this.state = JSON.parse(saved);
       } catch (e) {
-        this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
+        this.state = this.getInitialState();
       }
     } else {
-      this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
+      this.state = this.getInitialState();
       this.save();
     }
     this.subscribers = [];
   }
 
+  getInitialState() {
+    return {
+      currentView: 'login', // 'login', 'student', 'officer', 'admin', 'verify'
+      currentRole: 'guest', // 'guest', 'student', 'officer', 'admin'
+      currentUser: null,    // User object
+      loginSelectedRole: 'student', // 'student', 'officer', 'admin'
+      loginSelectedId: '4VV24CI175', // default student USN or deskId
+      currentOfficerDesk: 'library',
+      selectedVerifyHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      requests: JSON.parse(JSON.stringify(SEED_REQUESTS))
+    };
+  }
+
   save() {
-    localStorage.setItem('clearpass_a24_state', JSON.stringify(this.state));
+    localStorage.setItem('clearpass_v3_state', JSON.stringify(this.state));
     this.notify();
+  }
+
+  resetAllData() {
+    this.state = this.getInitialState();
+    this.save();
   }
 
   subscribe(fn) {
@@ -180,33 +140,84 @@ class StateStore {
     this.subscribers.forEach(fn => fn(this.state));
   }
 
-  setView(view) {
-    this.state.currentView = view;
-    this.save();
-  }
-
-  setRole(role, studentUsn = null) {
-    this.state.currentRole = role;
+  // Login Selection state on login view
+  setLoginRoleTab(role) {
+    this.state.loginSelectedRole = role;
     if (role === 'student') {
-      const target = this.state.students.find(s => s.usn === (studentUsn || '4VV24CI175')) || this.state.students[0];
-      this.state.currentUser = target;
+      this.state.loginSelectedId = '4VV24CI175';
     } else if (role === 'officer') {
-      this.state.currentUser = {
-        name: 'Desk Officer In-Charge',
-        usn: 'FACULTY-VVCE',
-        dept: 'VVCE Administrative Cell'
-      };
+      this.state.loginSelectedId = 'library';
     } else if (role === 'admin') {
-      this.state.currentUser = {
-        name: 'Dean of Academic Affairs',
-        usn: 'ADMIN-VVCE',
-        dept: 'VVCE Administration'
-      };
+      this.state.loginSelectedId = 'admin';
     }
     this.save();
   }
 
-  setOfficerDesk(deskId) {
+  setLoginSelectedId(id) {
+    this.state.loginSelectedId = id;
+    this.save();
+  }
+
+  // Authentication & Session
+  login() {
+    const role = this.state.loginSelectedRole;
+    const id = this.state.loginSelectedId;
+
+    if (role === 'student') {
+      this.state.currentRole = 'student';
+      this.state.currentUser = STUDENTS.find(s => s.usn === id) || STUDENTS[0];
+      this.state.currentView = 'student';
+    } else if (role === 'officer') {
+      this.state.currentRole = 'officer';
+      const desk = OFFICER_DESKS.find(d => d.id === id) || OFFICER_DESKS[0];
+      this.state.currentOfficerDesk = desk.id;
+      this.state.currentUser = {
+        name: desk.officerName,
+        deskName: desk.name,
+        roleTitle: desk.roleTitle,
+        deskId: desk.id
+      };
+      this.state.currentView = 'officer';
+    } else if (role === 'admin') {
+      this.state.currentRole = 'admin';
+      this.state.currentUser = {
+        name: 'Dean of Academic Affairs',
+        roleTitle: 'Dean Academics & Principal Office',
+        dept: 'VVCE Administrative Cell'
+      };
+      this.state.currentView = 'admin';
+    }
+
+    this.save();
+  }
+
+  logout() {
+    this.state.currentRole = 'guest';
+    this.state.currentUser = null;
+    this.state.currentView = 'login';
+    this.save();
+  }
+
+  // Navigation with Role Access Verification
+  setView(view) {
+    // Role based guard
+    if (this.state.currentRole === 'student') {
+      if (view === 'officer' || view === 'admin') {
+        window.clearPassApp.showToast('ACCESS DENIED: Students cannot inspect faculty ledgers or admin audits.');
+        return;
+      }
+    } else if (this.state.currentRole === 'officer') {
+      if (view === 'student' || view === 'admin') {
+        window.clearPassApp.showToast('ACCESS DENIED: Faculty accounts cannot access student private portals or admin audits.');
+        return;
+      }
+    }
+
+    this.state.currentView = view;
+    this.save();
+  }
+
+  setOfficerDeskFilter(deskId) {
     this.state.currentOfficerDesk = deskId;
     this.save();
   }
@@ -240,6 +251,7 @@ class StateStore {
     };
 
     this.state.requests.unshift(newRequest);
+    this.state.currentView = 'student';
     this.save();
     return newRequest;
   }
@@ -260,13 +272,13 @@ class StateStore {
       step.remarks = remarks || 'Clearance granted. No outstanding liabilities.';
       step.timestamp = timeStr;
 
-      // Advance to next desk if available
+      // Advance to next desk
       if (currentStepIndex < req.steps.length - 1) {
         req.steps[currentStepIndex + 1].status = 'active';
         req.activeDesk = req.steps[currentStepIndex + 1].deskId;
         req.elapsedWait = '10M';
       } else {
-        // All desks cleared!
+        // Final HOD Sign-off!
         req.status = 'approved';
         req.activeDesk = null;
         req.elapsedWait = 'FULLY CLEARED';
@@ -286,6 +298,19 @@ class StateStore {
     this.save();
     return true;
   }
+
+  // Fast Simulator step for live Review demonstration
+  simulateAdvanceStep(reqId) {
+    const req = this.state.requests.find(r => r.id === reqId);
+    if (!req || req.status !== 'in_progress') return;
+
+    const activeStep = req.steps.find(s => s.status === 'active');
+    if (!activeStep) return;
+
+    const desk = OFFICER_DESKS.find(d => d.id === activeStep.deskId);
+    const remark = desk ? desk.defaultRemark : 'Clearance audited and approved.';
+    this.processDeskAction(reqId, activeStep.deskId, 'approve', remark);
+  }
 }
 
 // Deterministic Cryptographic Hash Generator
@@ -300,12 +325,11 @@ function generateCryptographicHash(str) {
   return (hex + 'e3b0c44298fc1c14' + hex + '49afbf4c8996' + hex).substring(0, 64);
 }
 
-// Zero-Dependency Pure SVG QR Code Generator (Crisp Vector Matrix)
+// Zero-Dependency Pure SVG QR Code Generator
 function generatePureSVGQRCode(data, size = 120) {
   const matrixSize = 25;
   const matrix = Array.from({ length: matrixSize }, () => Array(matrixSize).fill(false));
 
-  // Finder Patterns
   function drawFinder(r0, c0) {
     for (let r = 0; r < 7; r++) {
       for (let c = 0; c < 7; c++) {
@@ -320,13 +344,11 @@ function generatePureSVGQRCode(data, size = 120) {
   drawFinder(0, matrixSize - 7);
   drawFinder(matrixSize - 7, 0);
 
-  // Timing lines
   for (let i = 8; i < matrixSize - 8; i++) {
     matrix[6][i] = (i % 2 === 0);
     matrix[i][6] = (i % 2 === 0);
   }
 
-  // Data fill simulation
   let idx = 0;
   for (let r = 0; r < matrixSize; r++) {
     for (let c = 0; c < matrixSize; c++) {
@@ -360,51 +382,37 @@ function generatePureSVGQRCode(data, size = 120) {
 // Global Store Instance
 const store = new StateStore();
 
-// Motion.dev × A24 UI Controller
+// UI Controller with Dynamic Role Navigation & Real-time State Binding
 class ClearPassUI {
   constructor() {
+    this.store = store;
     this.expandedLedgerRowId = null;
     this.init();
   }
 
   init() {
-    this.bindEvents();
+    this.bindGlobalEvents();
     this.render();
     store.subscribe(() => this.render());
   }
 
-  bindEvents() {
-    // Navigation bar pills
-    const navBar = document.getElementById('route-navigator');
-    if (navBar) {
-      navBar.addEventListener('click', (e) => {
-        const btn = e.target.closest('.nav-pill-btn');
-        if (!btn) return;
-        const targetView = btn.dataset.view;
-        store.setView(targetView);
-        this.updateNavPillSlider(btn);
-      });
-    }
-
-    // Role switcher on Login View
-    const roleTabs = document.getElementById('login-role-tabs');
-    if (roleTabs) {
-      roleTabs.addEventListener('click', (e) => {
-        const btn = e.target.closest('.role-tab-btn');
-        if (!btn) return;
-        const role = btn.dataset.role;
-        store.setRole(role);
-        this.updateLoginRoleSlider(btn);
-      });
-    }
-
-    // Review-2 compliance button
+  bindGlobalEvents() {
+    // Review-2 compliance modal trigger
     const revBtn = document.getElementById('btn-review2-compliance');
     if (revBtn) {
       revBtn.addEventListener('click', () => {
         this.openModal('modal-review2-compliance');
       });
     }
+
+    // Modal Close handlers
+    document.querySelectorAll('.modal-backdrop-a24').forEach(backdrop => {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop || e.target.closest('.modal-close-trigger')) {
+          this.closeModal(backdrop.id);
+        }
+      });
+    });
 
     // New Request button on Student Dashboard
     const newReqBtn = document.getElementById('btn-open-new-request');
@@ -429,51 +437,6 @@ class ClearPassUI {
         this.showToast(`CLEARANCE PROTOCOL ${created.id} DISPATCHED TO CENTRAL LIBRARY`);
       });
     }
-
-    // Modal Close handlers
-    document.querySelectorAll('.modal-backdrop-a24').forEach(backdrop => {
-      backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop || e.target.closest('.modal-close-trigger')) {
-          this.closeModal(backdrop.id);
-        }
-      });
-    });
-  }
-
-  updateNavPillSlider(activeBtn) {
-    const navBar = document.getElementById('route-navigator');
-    const slider = document.getElementById('nav-active-slider');
-    if (!navBar || !slider) return;
-
-    const btn = activeBtn || navBar.querySelector(`.nav-pill-btn[data-view="${store.state.currentView}"]`);
-    if (!btn) return;
-
-    navBar.querySelectorAll('.nav-pill-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const navRect = navBar.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
-
-    slider.style.left = `${btnRect.left - navRect.left}px`;
-    slider.style.width = `${btnRect.width}px`;
-  }
-
-  updateLoginRoleSlider(activeBtn) {
-    const container = document.getElementById('login-role-tabs');
-    const slider = document.getElementById('login-role-slider');
-    if (!container || !slider) return;
-
-    const btn = activeBtn || container.querySelector(`.role-tab-btn[data-role="${store.state.currentRole}"]`);
-    if (!btn) return;
-
-    container.querySelectorAll('.role-tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const cRect = container.getBoundingClientRect();
-    const bRect = btn.getBoundingClientRect();
-
-    slider.style.left = `${bRect.left - cRect.left}px`;
-    slider.style.width = `${bRect.width}px`;
   }
 
   openModal(id) {
@@ -505,12 +468,121 @@ class ClearPassUI {
   }
 
   render() {
+    this.renderTopNav();
     this.renderActiveView();
-    this.renderTopNavMeta();
+    this.renderLoginPane();
     this.renderStudentView();
     this.renderOfficerLedger();
     this.renderAdminView();
     this.renderVerifyView();
+  }
+
+  // 1. Dynamic Role-Based Top Navigation
+  renderTopNav() {
+    const navBar = document.getElementById('route-navigator');
+    const roleBadge = document.getElementById('nav-role-badge');
+    const authActions = document.getElementById('nav-auth-actions');
+    if (!navBar) return;
+
+    const role = store.state.currentRole;
+    const currentView = store.state.currentView;
+
+    let navHTML = '';
+    if (role === 'student') {
+      navHTML = `
+        <button class="nav-pill-btn ${currentView === 'student' ? 'active' : ''}" data-view="student">01 // MY CLEARANCE RAIL</button>
+        <button class="nav-pill-btn ${currentView === 'verify' ? 'active' : ''}" data-view="verify">02 // VERIFY CERTIFICATE</button>
+      `;
+      if (roleBadge) {
+        roleBadge.textContent = `STUDENT: ${store.state.currentUser.name} (${store.state.currentUser.usn})`;
+        roleBadge.style.display = 'inline-block';
+      }
+      if (authActions) {
+        authActions.innerHTML = `
+          <button class="review-badge-btn" onclick="window.clearPassApp.store.logout()">
+            <span>LOGOUT / SWITCH ROLE ➔</span>
+          </button>
+        `;
+      }
+    } else if (role === 'officer') {
+      const deskName = store.state.currentUser ? store.state.currentUser.deskName : 'DEPARTMENT DESK';
+      navHTML = `
+        <button class="nav-pill-btn ${currentView === 'officer' ? 'active' : ''}" data-view="officer">01 // ${deskName.toUpperCase()} QUEUE</button>
+        <button class="nav-pill-btn ${currentView === 'verify' ? 'active' : ''}" data-view="verify">02 // VERIFY CERTIFICATE</button>
+      `;
+      if (roleBadge) {
+        roleBadge.textContent = `FACULTY: ${store.state.currentUser.name} (${store.state.currentUser.roleTitle})`;
+        roleBadge.style.display = 'inline-block';
+      }
+      if (authActions) {
+        authActions.innerHTML = `
+          <button class="review-badge-btn" onclick="window.clearPassApp.store.logout()">
+            <span>SWITCH DESK / LOGOUT ➔</span>
+          </button>
+        `;
+      }
+    } else if (role === 'admin') {
+      navHTML = `
+        <button class="nav-pill-btn ${currentView === 'admin' ? 'active' : ''}" data-view="admin">01 // INSTITUTIONAL AUDIT & KPIS</button>
+        <button class="nav-pill-btn ${currentView === 'verify' ? 'active' : ''}" data-view="verify">02 // VERIFY CERTIFICATE</button>
+      `;
+      if (roleBadge) {
+        roleBadge.textContent = `ADMIN: ${store.state.currentUser.name}`;
+        roleBadge.style.display = 'inline-block';
+      }
+      if (authActions) {
+        authActions.innerHTML = `
+          <button class="review-badge-btn" onclick="window.clearPassApp.store.logout()">
+            <span>LOGOUT ➔</span>
+          </button>
+        `;
+      }
+    } else {
+      // Guest / Login page
+      navHTML = `
+        <button class="nav-pill-btn ${currentView === 'login' ? 'active' : ''}" data-view="login">01 // ACCESS LOGIN</button>
+        <button class="nav-pill-btn ${currentView === 'verify' ? 'active' : ''}" data-view="verify">02 // PUBLIC VERIFIER</button>
+      `;
+      if (roleBadge) roleBadge.style.display = 'none';
+      if (authActions) {
+        authActions.innerHTML = `
+          <button class="review-badge-btn" id="btn-review2-compliance" onclick="window.clearPassApp.openModal('modal-review2-compliance')">
+            <span style="color: var(--accent-volt);">●</span>
+            <span>REV-02 // 20 NOV 2026</span>
+          </button>
+        `;
+      }
+    }
+
+    navBar.innerHTML = `<div class="nav-active-pill" id="nav-active-slider"></div>` + navHTML;
+
+    // Attach click events
+    navBar.querySelectorAll('.nav-pill-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetView = btn.dataset.view;
+        store.setView(targetView);
+      });
+    });
+
+    this.updateNavPillSlider();
+  }
+
+  updateNavPillSlider() {
+    const navBar = document.getElementById('route-navigator');
+    const slider = document.getElementById('nav-active-slider');
+    if (!navBar || !slider) return;
+
+    const activeBtn = navBar.querySelector('.nav-pill-btn.active');
+    if (!activeBtn) {
+      slider.style.width = '0px';
+      return;
+    }
+
+    const navRect = navBar.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+
+    slider.style.left = `${btnRect.left - navRect.left}px`;
+    slider.style.width = `${btnRect.width}px`;
   }
 
   renderActiveView() {
@@ -521,23 +593,115 @@ class ClearPassUI {
 
     const targetSec = document.getElementById(`view-${view}`);
     if (targetSec) targetSec.classList.add('active');
-
     this.updateNavPillSlider();
   }
 
-  renderTopNavMeta() {
-    const roleBadge = document.getElementById('nav-role-badge');
-    if (roleBadge) {
-      roleBadge.textContent = `${store.state.currentRole.toUpperCase()}: ${store.state.currentUser.name}`;
+  // 2. Dynamic Login Pane (Students vs Officers vs Admin)
+  renderLoginPane() {
+    const container = document.getElementById('login-credential-dynamic-container');
+    const roleTabs = document.getElementById('login-role-tabs');
+    const loginCtaBtn = document.getElementById('btn-login-cta');
+    if (!container) return;
+
+    const currentTab = store.state.loginSelectedRole;
+    const selectedId = store.state.loginSelectedId;
+
+    // Update role segmented buttons
+    if (roleTabs) {
+      roleTabs.querySelectorAll('.role-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.role === currentTab);
+        btn.onclick = () => {
+          store.setLoginRoleTab(btn.dataset.role);
+          this.updateLoginRoleSlider(btn);
+        };
+      });
+      this.updateLoginRoleSlider();
+    }
+
+    // Render credential options based on active tab
+    if (currentTab === 'student') {
+      container.innerHTML = `
+        <span class="field-label">SELECT STUDENT CREDENTIAL</span>
+        <div class="quick-dossier-list">
+          ${STUDENTS.map(s => `
+            <div class="dossier-card ${selectedId === s.usn ? 'selected' : ''}" onclick="window.clearPassApp.store.setLoginSelectedId('${s.usn}')">
+              <div>
+                <div class="dossier-name">${s.name}</div>
+                <div class="mono-label" style="font-size: 10px;">${s.dept} · SEM ${s.sem} · SEC ${s.sec}</div>
+              </div>
+              <div class="dossier-usn">${s.usn}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      const selectedStudent = STUDENTS.find(s => s.usn === selectedId) || STUDENTS[0];
+      if (loginCtaBtn) {
+        loginCtaBtn.textContent = `LOGIN AS STUDENT (${selectedStudent.name}) ➔`;
+        loginCtaBtn.onclick = () => store.login();
+      }
+    } else if (currentTab === 'officer') {
+      container.innerHTML = `
+        <span class="field-label">SELECT DEPARTMENT CLEARANCE DESK TO AUDIT</span>
+        <div class="quick-dossier-list">
+          ${OFFICER_DESKS.map(d => `
+            <div class="dossier-card ${selectedId === d.id ? 'selected' : ''}" onclick="window.clearPassApp.store.setLoginSelectedId('${d.id}')">
+              <div>
+                <div class="dossier-name">${d.icon} ${d.name}</div>
+                <div class="mono-label" style="font-size: 10px;">${d.officerName} · ${d.roleTitle}</div>
+              </div>
+              <div class="mono-label" style="color: var(--accent-volt); font-size: 10px;">DESK // ${d.id.toUpperCase()}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      const selectedDesk = OFFICER_DESKS.find(d => d.id === selectedId) || OFFICER_DESKS[0];
+      if (loginCtaBtn) {
+        loginCtaBtn.textContent = `LOGIN TO ${selectedDesk.name.toUpperCase()} QUEUE ➔`;
+        loginCtaBtn.onclick = () => store.login();
+      }
+    } else if (currentTab === 'admin') {
+      container.innerHTML = `
+        <span class="field-label">ADMINISTRATIVE OVERSIGHT CREDENTIAL</span>
+        <div class="quick-dossier-list">
+          <div class="dossier-card selected">
+            <div>
+              <div class="dossier-name">🛡️ Dean of Academic Affairs & Principal Office</div>
+              <div class="mono-label" style="font-size: 10px;">VVCE Administrative Cell · Full Clearance Auditing</div>
+            </div>
+            <div class="mono-label" style="color: var(--accent-volt); font-size: 10px;">SUPER_ADMIN</div>
+          </div>
+        </div>
+      `;
+      if (loginCtaBtn) {
+        loginCtaBtn.textContent = `LOGIN AS INSTITUTIONAL ADMINISTRATOR ➔`;
+        loginCtaBtn.onclick = () => store.login();
+      }
     }
   }
 
+  updateLoginRoleSlider(activeBtn) {
+    const container = document.getElementById('login-role-tabs');
+    const slider = document.getElementById('login-role-slider');
+    if (!container || !slider) return;
+
+    const btn = activeBtn || container.querySelector(`.role-tab-btn[data-role="${store.state.loginSelectedRole}"]`);
+    if (!btn) return;
+
+    const cRect = container.getBoundingClientRect();
+    const bRect = btn.getBoundingClientRect();
+
+    slider.style.left = `${bRect.left - cRect.left}px`;
+    slider.style.width = `${bRect.width}px`;
+  }
+
+  // 3. Student Dashboard & Live Sequential Rail
   renderStudentView() {
     const user = store.state.currentUser;
+    if (!user || store.state.currentRole !== 'student') return;
+
     const reqs = store.state.requests.filter(r => r.usn === user.usn);
     const activeReq = reqs[0] || store.state.requests[0];
 
-    // Masthead metadata
     const nameEl = document.getElementById('student-masthead-name');
     const usnEl = document.getElementById('student-masthead-usn');
     const deptEl = document.getElementById('student-masthead-dept');
@@ -546,14 +710,20 @@ class ClearPassUI {
     if (usnEl) usnEl.textContent = user.usn;
     if (deptEl) deptEl.textContent = `${user.dept} · SEM ${user.sem || '05'}`;
 
-    // Render Hero Rail Component
     const railContainer = document.getElementById('student-hero-rail-container');
     if (!railContainer) return;
 
     if (!activeReq) {
-      railContainer.innerHTML = `<div style="padding: 24px; text-align: center; color: var(--text-slate);">NO ACTIVE CLEARANCE PROTOCOL FOUND.</div>`;
+      railContainer.innerHTML = `
+        <div style="padding: 48px; text-align: center; color: var(--text-slate); border: 1px dashed var(--border-subtle);">
+          <p class="mono-label" style="font-size: 12px; margin-bottom: 12px;">NO ACTIVE CLEARANCE PROTOCOL FOUND FOR THIS USN</p>
+          <button class="btn-volt" onclick="window.clearPassApp.openModal('modal-new-request')">+ INITIATE NEW CLEARANCE REQUEST</button>
+        </div>
+      `;
       return;
     }
+
+    const currentActiveStep = activeReq.steps.find(s => s.status === 'active');
 
     railContainer.innerHTML = `
       <div class="rail-card-header">
@@ -565,14 +735,30 @@ class ClearPassUI {
         <div style="display: flex; align-items: center; gap: 12px;">
           ${activeReq.activeDesk ? `
             <div class="mono-label" style="color: var(--accent-volt); display: flex; align-items: center; gap: 6px;">
-              <span class="volt-dot" style="width: 5px; height: 5px;"></span>
-              <span>AT ${activeReq.activeDesk.toUpperCase()} · ${activeReq.elapsedWait}</span>
+              <span class="volt-dot" style="width: 6px; height: 6px;"></span>
+              <span>WAITING AT ${activeReq.activeDesk.toUpperCase()} · ${activeReq.elapsedWait}</span>
             </div>
           ` : `
-            <div class="mono-label" style="color: var(--state-approved);">✓ FULLY CLEARED</div>
+            <div class="mono-label" style="color: var(--state-approved); font-weight: 700;">✓ FULLY CLEARED & ISSUED</div>
           `}
         </div>
       </div>
+
+      <!-- Live Demonstration Helper for Review-2 Panel -->
+      ${activeReq.status === 'in_progress' ? `
+        <div style="background: rgba(232, 255, 71, 0.05); border: 1px solid rgba(232, 255, 71, 0.2); padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--accent-volt); font-size: 13px;">⚡</span>
+            <span style="font-size: 12px; color: var(--text-bone);">
+              Currently waiting at <strong>${currentActiveStep ? currentActiveStep.fullName : 'Next Desk'}</strong>.
+              Log in as <strong>${currentActiveStep ? currentActiveStep.officerName : 'Officer'}</strong> to sign off, or click fast simulator:
+            </span>
+          </div>
+          <button class="btn-stark" id="btn-simulate-step" style="padding: 5px 12px; font-size: 10px; border-color: var(--accent-volt); color: var(--accent-volt);">
+            SIMULATE NEXT SIGN-OFF (DEMO) ➔
+          </button>
+        </div>
+      ` : ''}
 
       <!-- Sequential 5-Desk Grid (LIBRARY -> HOSTEL -> ACCOUNTS -> LAB -> HOD) -->
       <div class="rail-grid-steps">
@@ -583,7 +769,16 @@ class ClearPassUI {
       ${activeReq.status === 'approved' ? this.renderArtifactDrawerHTML(activeReq) : ''}
     `;
 
-    // Attach verify trigger in artifact
+    // Attach simulator trigger
+    const simBtn = railContainer.querySelector('#btn-simulate-step');
+    if (simBtn) {
+      simBtn.addEventListener('click', () => {
+        store.simulateAdvanceStep(activeReq.id);
+        this.showToast(`STEP APPROVED! ADVANCED TO NEXT DESK.`);
+      });
+    }
+
+    // Attach copy verify link
     const copyBtn = railContainer.querySelector('#btn-copy-verify-link');
     if (copyBtn) {
       copyBtn.addEventListener('click', () => {
@@ -610,7 +805,7 @@ class ClearPassUI {
       <div class="rail-node-block ${stateClass}">
         <div>
           <div class="node-top-row">
-            <div class="node-marker">${step.order}</div>
+            <div class="node-marker">${isCompleted ? '✓' : step.order}</div>
             <span class="mono-label" style="font-size: 10px;">${stateClass.toUpperCase()}</span>
           </div>
           <div class="node-step-title">${step.deskName}</div>
@@ -622,7 +817,7 @@ class ClearPassUI {
         </div>
 
         <div class="node-timestamp-mono">
-          ${isCompleted ? step.timestamp : (isActive ? 'WAITING DECISION' : 'PENDING ROUTE')}
+          ${isCompleted ? step.timestamp : (isActive ? 'WAITING APPROVAL' : 'PENDING ROUTE')}
         </div>
       </div>
     `;
@@ -661,7 +856,6 @@ class ClearPassUI {
             All clearances have been audited across the 5 mandatory desks without outstanding liabilities.
           </div>
 
-          <!-- A24 Ledger Table -->
           <table class="cert-ledger-table">
             <thead>
               <tr>
@@ -703,7 +897,7 @@ class ClearPassUI {
               </div>
               <div style="display: flex; gap: 8px; margin-top: 6px;">
                 <button class="btn-stark" onclick="window.print()">PRINT / EXPORT PDF</button>
-                <button class="btn-volt" id="btn-copy-verify-link">COPY VERIFY LINK</button>
+                <button class="btn-volt" id="btn-copy-verify-link">INSPECT CRYPTO PROOF</button>
               </div>
             </div>
           </div>
@@ -712,13 +906,20 @@ class ClearPassUI {
     `;
   }
 
+  // 4. Department Officer Queue
   renderOfficerLedger() {
     const container = document.getElementById('officer-ledger-tbody');
+    const headerTitle = document.getElementById('officer-desk-header-title');
     if (!container) return;
 
     const activeFilter = store.state.currentOfficerDesk;
-    let list = store.state.requests;
+    const currentOfficer = store.state.currentUser;
 
+    if (headerTitle && currentOfficer) {
+      headerTitle.textContent = `${currentOfficer.deskName || 'Faculty'} Clearance Queue`;
+    }
+
+    let list = store.state.requests;
     if (activeFilter !== 'all') {
       list = list.filter(r => {
         const step = r.steps.find(s => s.deskId === activeFilter);
@@ -729,8 +930,8 @@ class ClearPassUI {
     if (list.length === 0) {
       container.innerHTML = `
         <tr>
-          <td colspan="6" style="padding: 36px; text-align: center; color: var(--text-slate); font-family: var(--font-mono); font-size: 12px;">
-            NO PENDING CLEARANCE PROTOCOLS AT THIS DESK.
+          <td colspan="6" style="padding: 40px; text-align: center; color: var(--text-slate); font-family: var(--font-mono); font-size: 12px;">
+            NO PENDING CLEARANCE PROTOCOLS AT THIS DESK QUEUE.
           </td>
         </tr>
       `;
@@ -740,9 +941,13 @@ class ClearPassUI {
     container.innerHTML = list.map(req => {
       const step = req.steps.find(s => s.deskId === (activeFilter === 'all' ? (req.activeDesk || 'library') : activeFilter)) || req.steps[0];
       const isExpanded = this.expandedLedgerRowId === req.id;
+      const isActionable = step.status === 'active';
+
+      const deskPreset = OFFICER_DESKS.find(d => d.id === step.deskId);
+      const defaultRemark = deskPreset ? deskPreset.defaultRemark : 'Clearance verified. Zero outstanding liabilities.';
 
       return `
-        <tr class="ledger-row ${isExpanded ? 'expanded' : ''}" data-req-id="${req.id}">
+        <tr class="ledger-row ${isExpanded ? 'expanded' : ''}" data-req-id="${req.id}" style="${isActionable ? 'border-left: 2px solid var(--accent-volt);' : ''}">
           <td class="ledger-cell ledger-cell-mono">${req.usn}</td>
           <td class="ledger-cell">
             <div style="font-weight: 600; color: var(--text-bone);">${req.studentName}</div>
@@ -752,12 +957,12 @@ class ClearPassUI {
           <td class="ledger-cell mono-label">${step.status === 'active' ? req.elapsedWait : 'COMPLETED'}</td>
           <td class="ledger-cell">
             <span class="mono-label" style="color: ${step.status === 'completed' ? 'var(--state-approved)' : (step.status === 'active' ? 'var(--accent-volt)' : 'var(--text-slate)')}">
-              ${step.status.toUpperCase()}
+              ${step.status === 'active' ? '● ACTION REQUIRED' : step.status.toUpperCase()}
             </span>
           </td>
           <td class="ledger-cell">
-            <button class="btn-stark" style="padding: 4px 10px; font-size: 10px;">
-              ${isExpanded ? 'COLLAPSE ▲' : 'ACTION ▼'}
+            <button class="btn-stark" style="padding: 4px 10px; font-size: 10px; ${isActionable ? 'border-color: var(--accent-volt); color: var(--accent-volt);' : ''}">
+              ${isExpanded ? 'COLLAPSE ▲' : (isActionable ? 'REVIEW & SIGN ▼' : 'VIEW DETAILS ▼')}
             </button>
           </td>
         </tr>
@@ -771,11 +976,11 @@ class ClearPassUI {
                     <span class="mono-bold" style="color: var(--accent-volt);">${req.id}</span>
                   </div>
                   <div class="dossier-col">
-                    <span class="mono-label">STUDENT PURPOSE</span>
+                    <span class="mono-label">PURPOSE OF CLEARANCE</span>
                     <span style="font-size: 12px; color: var(--text-bone);">${req.purpose}</span>
                   </div>
                   <div class="dossier-col">
-                    <span class="mono-label">DESK RESPONSIBILITY</span>
+                    <span class="mono-label">CURRENT AUDIT DESK</span>
                     <span class="mono-bold">${step.fullName}</span>
                   </div>
                   <div class="dossier-col">
@@ -784,26 +989,32 @@ class ClearPassUI {
                   </div>
                 </div>
 
-                <div class="drawer-remark-row">
-                  <input 
-                    type="text" 
-                    id="input-remark-${req.id}" 
-                    class="drawer-remark-input" 
-                    placeholder="Enter mandatory audit remark (e.g. Cleared. Zero outstanding dues.)..." 
-                    value="Clearance verified and approved."
-                  />
-                  <div style="display: flex; gap: 8px;">
-                    <button class="btn-approve-pill btn-triage-act" data-req-id="${req.id}" data-desk="${step.deskId}" data-act="approve">
-                      ✓ APPROVE CLEARANCE
-                    </button>
-                    <button class="btn-correction-pill btn-triage-act" data-req-id="${req.id}" data-desk="${step.deskId}" data-act="correction">
-                      ! REQUEST CORRECTION
-                    </button>
-                    <button class="btn-reject-pill btn-triage-act" data-req-id="${req.id}" data-desk="${step.deskId}" data-act="reject">
-                      ✕ REJECT
-                    </button>
+                ${isActionable ? `
+                  <div class="drawer-remark-row">
+                    <input 
+                      type="text" 
+                      id="input-remark-${req.id}" 
+                      class="drawer-remark-input" 
+                      placeholder="Enter official sign-off remark..." 
+                      value="${defaultRemark}"
+                    />
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn-approve-pill btn-triage-act" data-req-id="${req.id}" data-desk="${step.deskId}" data-act="approve">
+                        ✓ APPROVE CLEARANCE
+                      </button>
+                      <button class="btn-correction-pill btn-triage-act" data-req-id="${req.id}" data-desk="${step.deskId}" data-act="correction">
+                        ! REQUEST CORRECTION
+                      </button>
+                      <button class="btn-reject-pill btn-triage-act" data-req-id="${req.id}" data-desk="${step.deskId}" data-act="reject">
+                        ✕ REJECT
+                      </button>
+                    </div>
                   </div>
-                </div>
+                ` : `
+                  <div style="background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25); padding: 10px 14px; font-size: 12px; color: var(--state-approved);">
+                    ✓ Clearance already completed at this desk on <strong>${step.timestamp}</strong> with remark: "<em>${step.remarks}</em>"
+                  </div>
+                `}
               </div>
             </td>
           </tr>
@@ -811,7 +1022,7 @@ class ClearPassUI {
       `;
     }).join('');
 
-    // Attach row expansion clicks
+    // Row expansion listeners
     container.querySelectorAll('.ledger-row').forEach(row => {
       row.addEventListener('click', (e) => {
         if (e.target.closest('.btn-triage-act')) return;
@@ -821,7 +1032,7 @@ class ClearPassUI {
       });
     });
 
-    // Attach triage action buttons
+    // Action triage buttons
     container.querySelectorAll('.btn-triage-act').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -833,23 +1044,23 @@ class ClearPassUI {
 
         store.processDeskAction(reqId, desk, act, remarks);
         this.expandedLedgerRowId = null;
-        this.showToast(`CLEARANCE PROTOCOL ${reqId} UPDATED AT ${desk.toUpperCase()}`);
+        this.showToast(`CLEARANCE ${reqId} ${act.toUpperCase()} AT ${desk.toUpperCase()}`);
       });
     });
 
-    // Desk filter buttons
+    // Desk filter bar
     const filterContainer = document.getElementById('desk-filter-group');
     if (filterContainer) {
       filterContainer.querySelectorAll('.desk-filter-pill').forEach(pill => {
         pill.classList.toggle('active', pill.dataset.desk === activeFilter);
         pill.onclick = () => {
-          store.setOfficerDesk(pill.dataset.desk);
-          this.renderOfficerLedger();
+          store.setOfficerDeskFilter(pill.dataset.desk);
         };
       });
     }
   }
 
+  // 5. Admin View
   renderAdminView() {
     const total = store.state.requests.length;
     const approved = store.state.requests.filter(r => r.status === 'approved').length;
@@ -864,6 +1075,7 @@ class ClearPassUI {
     if (elActive) elActive.textContent = `${active} IN ROUTE`;
   }
 
+  // 6. Public Verifier View
   renderVerifyView() {
     const container = document.getElementById('verify-artifact-container');
     if (!container) return;
@@ -920,7 +1132,6 @@ class ClearPassUI {
           <div>${qrSvg}</div>
         </div>
 
-        <!-- Full Audit Trail -->
         <div class="pass-audit-trail">
           <span class="mono-label" style="margin-bottom: 6px;">DEPARTMENT CLEARANCE AUDIT TRAIL</span>
           ${req.steps.map(s => `
@@ -936,7 +1147,7 @@ class ClearPassUI {
   }
 }
 
-// Instantiate UI Controller on DOM Load
+// Initialize on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
   window.clearPassApp = new ClearPassUI();
 });
