@@ -1,0 +1,32 @@
+{
+  "name": "clearpass-vvce",
+  "version": "2.4.0",
+  "description": "Digital No-Dues and Certificate Clearance System with QR Verification for VVCE (Vidyavardhaka College of Engineering)",
+  "main": "server_node.js",
+  "scripts": {
+    "start": "node server_node.js",
+    "dev": "nodemon server_node.js",
+    "seed": "node seed_mongo.js"
+  },
+  "keywords": [
+    "clearpass",
+    "vvce",
+    "digital-clearance",
+    "qr-verification",
+    "mongodb",
+    "express",
+    "nodejs",
+    "motion-design"
+  ],
+  "author": "Vamshik Patela ES, Rajesh BR, RP Jeetender Singh",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.2"
+  }
+}

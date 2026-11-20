@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearPass — Digital Clearance Protocol with QR Verification | VVCE</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Subtle A24 Cinematic Film Grain Texture -->
+  <div class="film-grain"></div>
+
+  <!-- Background Hairline Architectural Grid -->
+  <div class="bg-grid-overlay"></div>
+
+  <!-- Top Institutional Bar & Motion.dev Route Navigator -->
+  <header class="top-bar-institutional">
+    <div class="brand-section" onclick="window.clearPassApp.store?.setView('login')">
+      <div class="brand-crest">CP</div>
+      <div class="brand-title-wrap">
+        <div class="brand-main-title">
+          <span>ClearPass</span>
+          <span class="volt-dot"></span>
+        </div>
+        <div class="brand-subtitle-mono">VVCE · MYSURU · DIGITAL CLEARANCE PROTOCOL</div>
+      </div>
+    </div>
+
+    <!-- Motion.dev Shared Layout Spring Navigator -->
+    <nav class="route-navigator" id="route-navigator">
+      <div class="nav-active-pill" id="nav-active-slider"></div>
+      <button class="nav-pill-btn" data-view="login">01 // LOGIN</button>
+      <button class="nav-pill-btn active" data-view="student">02 // STUDENT TRACKER</button>
+      <button class="nav-pill-btn" data-view="officer">03 // OFFICER LEDGER</button>
+      <button class="nav-pill-btn" data-view="admin">04 // ADMIN AUDIT</button>
+      <button class="nav-pill-btn" data-view="verify">05 // VERIFY ARTIFACT</button>
+    </nav>
+
+    <div class="nav-right-actions">
+      <span class="role-tag-badge" id="nav-role-badge">STUDENT: VAMSHIK PATELA ES</span>
+      <button class="review-badge-btn" id="btn-review2-compliance">
+        <span style="color: var(--accent-volt);">●</span>
+        <span>REV-02 // 20 NOV 2026</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Architectural Workspace -->
+  <main class="main-workspace">
+
+    <!-- ====================================================================
+         VIEW A: LANDING & ROLE-BASED LOGIN (/login)
+         ==================================================================== -->
+    <section class="view-section" id="view-login">
+      <div class="landing-split-grid">
+        <!-- Editorial Left Pane -->
+        <div class="landing-editorial-pane">
+          <div class="editorial-header-top">
+            <span class="mono-label">VVCE · CSE (AI&ML) · CLEARANCE PROTOCOL 2026</span>
+            <h1 class="editorial-headline">
+              Clearance, <em>without</em><br/>the corridors.
+            </h1>
+            <p class="editorial-description">
+              An architectural protocol digitizing no-dues verification, multi-department approvals, 
+              and cryptographic credential issuance for Vidyavardhaka College of Engineering. 
+              Replacing physical signatures and queues with an immutable, audited workflow.
+            </p>
+          </div>
+
+          <div class="editorial-footer-stats">
+            <div class="stat-item">
+              <span class="stat-value">4.2H</span>
+              <span class="stat-label">AVG TURNAROUND (-96%)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">05 DESKS</span>
+              <span class="stat-label">SEQUENTIAL PIPELINE</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">100%</span>
+              <span class="stat-label">ZERO-PAPER AUDIT (SDG 12)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brutalist Login Selector Right Pane -->
+        <div class="landing-login-pane">
+          <div>
+            <span class="mono-label" style="color: var(--accent-volt);">ACCESS GATEWAY</span>
+            <h2 class="login-pane-title">Select Institutional Credential</h2>
+          </div>
+
+          <!-- Segmented Role Switcher with Spring Slider -->
+          <div class="role-segmented-control" id="login-role-tabs">
+            <div class="role-tab-slider" id="login-role-slider"></div>
+            <button class="role-tab-btn active" data-role="student">Student</button>
+            <button class="role-tab-btn" data-role="officer">Officer</button>
+            <button class="role-tab-btn" data-role="admin">Admin</button>
+          </div>
+
+          <!-- Student Profile Presets -->
+          <div class="form-field-group">
+            <span class="field-label">Student Dossier Selection</span>
+            <div class="quick-dossier-list">
+              <div class="dossier-card selected" onclick="window.clearPassApp.store?.setRole('student', '4VV24CI175'); window.clearPassApp.store?.setView('student');">
+                <div>
+                  <div class="dossier-name">Vamshik Patela ES</div>
+                  <div class="mono-label" style="font-size: 10px;">CSE (AIML) · SEM 05 · SEC C</div>
+                </div>
+                <div class="dossier-usn">4VV24CI175</div>
+              </div>
+
+              <div class="dossier-card" onclick="window.clearPassApp.store?.setRole('student', '4VV24CI34'); window.clearPassApp.store?.setView('student');">
+                <div>
+                  <div class="dossier-name">Rajesh BR</div>
+                  <div class="mono-label" style="font-size: 10px;">CSE (AIML) · SEM 05 · SEC A</div>
+                </div>
+                <div class="dossier-usn">4VV24CI34</div>
+              </div>
+
+              <div class="dossier-card" onclick="window.clearPassApp.store?.setRole('student', '4VV24CI132'); window.clearPassApp.store?.setView('student');">
+                <div>
+                  <div class="dossier-name">RP Jeetender Singh</div>
+                  <div class="mono-label" style="font-size: 10px;">CSE (AIML) · SEM 05 · SEC B</div>
+                </div>
+                <div class="dossier-usn">4VV24CI132</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 12px;">
+            <button class="btn-volt" style="width: 100%;" onclick="window.clearPassApp.store?.setView('student')">
+              ENTER CLEARANCE PROTOCOL →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW B: STUDENT DASHBOARD & LIVE ARCHITECTURAL TRACKER (/student)
+         ==================================================================== -->
+    <section class="view-section active" id="view-student">
+      <!-- Masthead -->
+      <div class="student-masthead">
+        <div class="student-meta-strip">
+          <div class="student-display-name" id="student-masthead-name">Vamshik Patela ES</div>
+          <div class="student-meta-pill">USN: <strong id="student-masthead-usn">4VV24CI175</strong></div>
+          <div class="student-meta-pill" id="student-masthead-dept">DEPT OF CSE (AI&ML) · SEM 05</div>
+        </div>
+
+        <button class="btn-volt" id="btn-open-new-request">
+          <span>+ NEW CLEARANCE REQUEST</span>
+        </button>
+      </div>
+
+      <!-- THE HERO COMPONENT: LIVE SEQUENTIAL PIPELINE RAIL -->
+      <div class="architectural-rail-card" id="student-hero-rail-container">
+        <!-- Rendered reactively by app.js: LIBRARY -> HOSTEL -> ACCOUNTS -> LAB -> HOD -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW C: DEPARTMENT OFFICER QUEUE LEDGER (/officer)
+         ==================================================================== -->
+    <section class="view-section" id="view-officer">
+      <div class="officer-control-strip">
+        <div>
+          <span class="mono-label">FACULTY & DESK LEDGER</span>
+          <h2 style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em;">Department Clearance Queue</h2>
+        </div>
+
+        <!-- Desk Switcher Tabs -->
+        <div class="desk-filter-group" id="desk-filter-group">
+          <button class="desk-filter-pill" data-desk="all">ALL DESKS</button>
+          <button class="desk-filter-pill" data-desk="library">LIBRARY</button>
+          <button class="desk-filter-pill" data-desk="hostel">HOSTEL</button>
+          <button class="desk-filter-pill active" data-desk="accounts">ACCOUNTS</button>
+          <button class="desk-filter-pill" data-desk="lab">LAB</button>
+          <button class="desk-filter-pill" data-desk="hod">HOD</button>
+        </div>
+      </div>
+
+      <!-- A24 Film-Credits High-Density Ledger Table -->
+      <div class="ledger-table-wrap">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th>01 // USN</th>
+              <th>02 // STUDENT</th>
+              <th>03 // CLEARANCE TYPE</th>
+              <th>04 // WAITING SINCE</th>
+              <th>05 // STATUS</th>
+              <th>06 // ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="officer-ledger-tbody">
+            <!-- Rendered reactively by app.js with inline expandable action drawer -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW D: PUBLIC QR VERIFICATION ARTIFACT (/verify)
+         ==================================================================== -->
+    <section class="view-section" id="view-verify">
+      <div class="verify-stage-center" id="verify-artifact-container">
+        <!-- Rendered reactively by app.js like an A24 collector's pass / boarding card -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW E: ADMIN ANALYTICS & AUDIT DASHBOARD (/admin)
+         ==================================================================== -->
+    <section class="view-section" id="view-admin">
+      <div style="margin-bottom: 24px;">
+        <span class="mono-label">INSTITUTIONAL OVERSIGHT</span>
+        <h2 style="font-size: 24px; font-weight: 600; letter-spacing: -0.01em;">ClearPass Administrative Audit</h2>
+      </div>
+
+      <!-- Minimalist 4-Column KPI Strip Separated by 1px Hairline Rules -->
+      <div class="admin-kpi-strip">
+        <div class="admin-kpi-col">
+          <span class="mono-label">01 // AVG TURNAROUND</span>
+          <div class="kpi-number-big" style="color: var(--accent-volt);">4.2H</div>
+          <span class="mono-label" style="font-size: 10px; color: var(--text-slate);">-96.1% VS 4.5 DAYS MANUAL</span>
+        </div>
+
+        <div class="admin-kpi-col">
+          <span class="mono-label">02 // ACTIVE IN PIPELINE</span>
+          <div class="kpi-number-big" id="admin-kpi-active">01 IN ROUTE</div>
+          <span class="mono-label" style="font-size: 10px; color: var(--text-slate);">SEQUENTIAL DESK QUEUE</span>
+        </div>
+
+        <div class="admin-kpi-col">
+          <span class="mono-label">03 // CLEARED TODAY</span>
+          <div class="kpi-number-big" id="admin-kpi-cleared">02 ISSUED</div>
+          <span class="mono-label" style="font-size: 10px; color: var(--state-approved);">✓ CRYPTO VERIFIED</span>
+        </div>
+
+        <div class="admin-kpi-col">
+          <span class="mono-label">04 // TOP BOTTLENECK</span>
+          <div class="kpi-number-big" style="color: var(--state-correction);">HOSTEL</div>
+          <span class="mono-label" style="font-size: 10px; color: var(--text-slate);">AVG 2.8H LATENCY</span>
+        </div>
+      </div>
+
+      <!-- Clean Architectural Delay Visualization -->
+      <div class="delay-viz-card">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="mono-label">DEPARTMENTAL APPROVAL DELAY BENCHMARKS</span>
+          <span class="mono-label" style="color: var(--accent-volt);">SLA TARGET: 24H</span>
+        </div>
+
+        <div class="delay-bars-grid">
+          <div class="delay-bar-row">
+            <span class="mono-bold">CENTRAL LIBRARY</span>
+            <div class="delay-track">
+              <div class="delay-fill-bar" style="width: 15%;"></div>
+            </div>
+            <span class="mono-label" style="text-align: right;">0.8 HOURS</span>
+          </div>
+
+          <div class="delay-bar-row">
+            <span class="mono-bold" style="color: var(--accent-volt);">CAMPUS HOSTEL</span>
+            <div class="delay-track">
+              <div class="delay-fill-bar bottleneck" style="width: 58%;"></div>
+            </div>
+            <span class="mono-label" style="text-align: right; color: var(--accent-volt);">2.8 HOURS</span>
+          </div>
+
+          <div class="delay-bar-row">
+            <span class="mono-bold">ACCOUNTS SECTION</span>
+            <div class="delay-track">
+              <div class="delay-fill-bar" style="width: 32%;"></div>
+            </div>
+            <span class="mono-label" style="text-align: right;">1.5 HOURS</span>
+          </div>
+
+          <div class="delay-bar-row">
+            <span class="mono-bold">AIML LABS</span>
+            <div class="delay-track">
+              <div class="delay-fill-bar" style="width: 20%;"></div>
+            </div>
+            <span class="mono-label" style="text-align: right;">1.0 HOURS</span>
+          </div>
+
+          <div class="delay-bar-row">
+            <span class="mono-bold">HOD OFFICE</span>
+            <div class="delay-track">
+              <div class="delay-fill-bar" style="width: 12%;"></div>
+            </div>
+            <span class="mono-label" style="text-align: right;">0.6 HOURS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- UN Sustainable Development Goals Impact Strip -->
+      <div class="sdg-impact-strip">
+        <div class="sdg-card-a24">
+          <span class="sdg-tag">SDG 04 // QUALITY EDUCATION</span>
+          <p style="font-size: 13px; color: var(--text-slate); line-height: 1.6;">
+            Eliminating physical corridor queues returns over <strong>2,400+ student hours</strong> per semester directly to laboratory research, mini-projects, and exam preparation.
+          </p>
+        </div>
+
+        <div class="sdg-card-a24">
+          <span class="sdg-tag">SDG 12 // RESPONSIBLE CONSUMPTION</span>
+          <p style="font-size: 13px; color: var(--text-slate); line-height: 1.6;">
+            100% Zero-paper digital clearance saves an estimated <strong>15,000+ sheets of paper</strong> annually across all engineering departments at VVCE.
+          </p>
+        </div>
+
+        <div class="sdg-card-a24">
+          <span class="sdg-tag">SDG 16 // STRONG INSTITUTIONS</span>
+          <p style="font-size: 13px; color: var(--text-slate); line-height: 1.6;">
+            Enforces strict timestamped accountability at every desk. QR cryptographic hashing renders fraudulent certificate alteration completely detectable.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: Apply New Clearance Request -->
+  <div class="modal-backdrop-a24" id="modal-new-request">
+    <div class="modal-dialog-a24">
+      <div class="modal-header-a24">
+        <div>
+          <span class="mono-label">DISPATCH PROTOCOL</span>
+          <h3 style="font-size: 16px; font-weight: 600; color: var(--text-bone);">New Clearance Request</h3>
+        </div>
+        <button class="btn-stark modal-close-trigger" style="padding: 4px 10px; font-size: 10px;">CLOSE [ESC]</button>
+      </div>
+
+      <form id="form-submit-clearance">
+        <div class="modal-body-a24">
+          <div class="form-field-group">
+            <span class="field-label">Student University Seat Number (USN)</span>
+            <input type="text" class="input-hairline" id="input-req-usn" value="4VV24CI175" required />
+          </div>
+
+          <div class="form-field-group">
+            <span class="field-label">Student Legal Name</span>
+            <input type="text" class="input-hairline" id="input-req-name" value="Vamshik Patela ES" required />
+          </div>
+
+          <div class="form-field-group">
+            <span class="field-label">Clearance Protocol Category</span>
+            <select class="select-hairline" id="input-req-type" required>
+              <option value="Semester No-Dues Clearance">Semester No-Dues Clearance (Hall Ticket Eligibility)</option>
+              <option value="Bonafide Certificate">Bonafide Certificate (Passport / Internship Verification)</option>
+              <option value="Laboratory Course Clearance">Laboratory Course Clearance & Breakage Sign-off</option>
+              <option value="Hostel Vacating Clearance">Hostel Vacating Clearance & Deposit Refund</option>
+              <option value="Institutional Transfer Certificate">Institutional Transfer Certificate (TC)</option>
+            </select>
+          </div>
+
+          <div class="form-field-group">
+            <span class="field-label">Purpose / Institutional Justification</span>
+            <input type="text" class="input-hairline" id="input-req-purpose" value="End-term clearance & Hall Ticket eligibility for Odd Semester 2026-27." required />
+          </div>
+
+          <div class="mono-label" style="font-size: 10px; color: var(--text-slate); line-height: 1.6; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+            ROUTE PROTOCOL: [1] LIBRARY ➔ [2] HOSTEL ➔ [3] ACCOUNTS ➔ [4] LAB ➔ [5] HOD. 
+            EACH SIGNATORY IS AUDITED WITH MANDATORY REMARKS AND CRYPTOGRAPHIC SIGNATURE.
+          </div>
+        </div>
+
+        <div class="modal-footer-a24">
+          <button type="button" class="btn-stark modal-close-trigger">DISCARD</button>
+          <button type="submit" class="btn-volt">INITIATE CLEARANCE PROTOCOL →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Review-2 Compliance & Team Contributions -->
+  <div class="modal-backdrop-a24" id="modal-review2-compliance">
+    <div class="modal-dialog-a24" style="max-width: 720px;">
+      <div class="modal-header-a24">
+        <div>
+          <span class="mono-label" style="color: var(--accent-volt);">VVCE CIRCULAR COMPLIANCE // REVIEW-2</span>
+          <h3 style="font-size: 18px; font-weight: 600; color: var(--text-bone);">Mini-Project Progress & Team Contributions</h3>
+        </div>
+        <button class="btn-stark modal-close-trigger" style="padding: 4px 10px; font-size: 10px;">CLOSE [ESC]</button>
+      </div>
+
+      <div class="modal-body-a24">
+        <div style="background: #0E0E12; border: 1px solid var(--border-medium); padding: 18px;">
+          <span class="mono-label" style="color: var(--state-approved);">✓ STATUS: 65%+ IMPLEMENTATION COMPLETED</span>
+          <p style="font-size: 13px; color: var(--text-bone); margin-top: 6px; line-height: 1.6;">
+            Exceeding the 50% milestone stipulated in the Dept. of CSE (AI & ML) circular for Review-2 (Deadline: 20th November 2026).
+            Multi-desk routing, officer triage actions, dynamic SVG QR generation, and cryptographic verification are fully operational.
+          </p>
+        </div>
+
+        <span class="mono-label">INDIVIDUAL ARCHITECTURAL OWNERSHIP</span>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="padding: 12px 14px; background: #0E0E12; border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="color: var(--text-bone);">Vamshik Patela ES</strong>
+              <span class="mono-label" style="color: var(--accent-volt);">4VV24CI175</span>
+            </div>
+            <div class="mono-label" style="margin-top: 2px;">BACKEND ENGINE & STATE MACHINE</div>
+            <p style="font-size: 12px; color: var(--text-slate); margin-top: 4px;">
+              Designed SQLite schema, Flask REST endpoints, and the sequential state transition pipeline ensuring no request can skip desks.
+            </p>
+          </div>
+
+          <div style="padding: 12px 14px; background: #0E0E12; border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="color: var(--text-bone);">Rajesh BR</strong>
+              <span class="mono-label" style="color: var(--accent-volt);">4VV24CI34</span>
+            </div>
+            <div class="mono-label" style="margin-top: 2px;">FRONTEND MOTION.DEV × A24 ARCHITECTURE</div>
+            <p style="font-size: 12px; color: var(--text-slate); margin-top: 4px;">
+              Built the Motion.dev × A24 design system, snappy spring physics, role navigator, live hero rail, and responsive mobile adaptations.
+            </p>
+          </div>
+
+          <div style="padding: 12px 14px; background: #0E0E12; border: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <strong style="color: var(--text-bone);">RP Jeetender Singh</strong>
+              <span class="mono-label" style="color: var(--accent-volt);">4VV24CI132</span>
+            </div>
+            <div class="mono-label" style="margin-top: 2px;">CRYPTOGRAPHIC QR & CERTIFICATE ARTIFACT</div>
+            <p style="font-size: 12px; color: var(--text-slate); margin-top: 4px;">
+              Authored pure SVG QR matrix generation, SHA-256 tamper verification, and print-ready CSS certificate layout.
+            </p>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+          <span class="mono-label">PROJECT GUIDE</span>
+          <span style="font-size: 12px; color: var(--text-bone);"><strong>Prof. Harshith V</strong> (Asst. Professor, Dept. of CSE - AI&ML)</span>
+        </div>
+      </div>
+
+      <div class="modal-footer-a24">
+        <button class="btn-stark modal-close-trigger">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Shelf Container -->
+  <div class="toast-shelf" id="toast-shelf"></div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

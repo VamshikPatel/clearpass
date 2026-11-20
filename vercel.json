@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "name": "clearpass-vvce",
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/verify/(.*)",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
