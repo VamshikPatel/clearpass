@@ -94,15 +94,9 @@
             <button class="role-tab-btn" data-role="admin">Admin</button>
           </div>
 
-          <!-- Dynamic Credential List (Students vs 5 Officer Desks vs Admin) -->
+          <!-- Dynamic Dedicated Credential Form (Students vs Officers vs Admin) -->
           <div class="form-field-group" id="login-credential-dynamic-container">
             <!-- Injected dynamically by app.js renderLoginPane() -->
-          </div>
-
-          <div style="display: flex; gap: 12px; margin-top: 12px;">
-            <button class="btn-volt" id="btn-login-cta" style="width: 100%;">
-              ENTER CLEARANCE PROTOCOL ➔
-            </button>
           </div>
         </div>
       </div>
@@ -308,12 +302,12 @@
         <div class="modal-body-a24">
           <div class="form-field-group">
             <span class="field-label">Student University Seat Number (USN)</span>
-            <input type="text" class="input-hairline" id="input-req-usn" value="4VV24CI175" required />
+            <input type="text" class="input-hairline" id="input-req-usn" value="4VV24CI175" readonly style="opacity: 0.8;" />
           </div>
 
           <div class="form-field-group">
             <span class="field-label">Student Legal Name</span>
-            <input type="text" class="input-hairline" id="input-req-name" value="Vamshik Patela ES" required />
+            <input type="text" class="input-hairline" id="input-req-name" value="Vamshik Patela ES" readonly style="opacity: 0.8;" />
           </div>
 
           <div class="form-field-group">
