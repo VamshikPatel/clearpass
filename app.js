@@ -1179,22 +1179,11 @@ class ClearPassUI {
     const container = document.getElementById('verify-artifact-container');
     if (!container) return;
 
-    let targetReq = null;
-    const lookup = store.state.lookupHash ? store.state.lookupHash.trim().toUpperCase() : null;
+    // SCENARIO 1: Authenticated Student viewing "02 // MY CERTIFICATE & QR"
+    if (store.state.currentRole === 'student' && store.state.currentUser) {
+      const myReq = store.state.requests.find(r => r.usn === store.state.currentUser.usn);
 
-    // Check 1: If an explicit lookup was made by Hash, Protocol ID, or USN
-    if (lookup) {
-      targetReq = store.state.requests.find(r => 
-        (r.certificateHash && r.certificateHash.toUpperCase() === lookup) ||
-        r.id.toUpperCase() === lookup ||
-        r.usn.toUpperCase() === lookup
-      );
-    }
-
-    // Check 2: If student is logged in and not doing a guest lookup, show THEIR OWN request
-    if (!targetReq && !lookup && store.state.currentRole === 'student' && store.state.currentUser) {
-      targetReq = store.state.requests.find(r => r.usn === store.state.currentUser.usn);
-      if (!targetReq) {
+      if (!myReq) {
         container.innerHTML = `
           <div style="max-width: 640px; margin: 32px auto; padding: 32px; background: #0E0E12; border: 1px solid var(--border-medium); text-align: center;">
             <div class="mono-label" style="color: var(--accent-volt); font-size: 11px; margin-bottom: 8px;">[NO ACTIVE RECORD]</div>
@@ -1207,72 +1196,82 @@ class ClearPassUI {
         `;
         return;
       }
+
+      if (myReq.status !== 'approved') {
+        const activeStep = myReq.steps.find(s => s.status === 'active') || myReq.steps[0];
+        container.innerHTML = `
+          <div style="max-width: 660px; margin: 24px auto; background: #0E0E12; border: 1px solid var(--border-medium); padding: 32px 36px;">
+            <div class="mono-label" style="color: var(--accent-volt); font-size: 11px; margin-bottom: 8px;">[STATUS: CLEARANCE IN PROGRESS]</div>
+            <h2 style="font-family: var(--font-serif); font-size: 28px; color: var(--text-bone); margin-bottom: 8px; font-weight: 400;">
+              Clearance Pass Pending Final Approvals
+            </h2>
+            <p style="font-size: 13px; color: var(--text-slate); line-height: 1.6; margin-bottom: 24px;">
+              Your clearance protocol (<strong>${myReq.id}</strong>) is actively routing across department desks. A tamper-proof SHA-256 certificate and official QR verification pass will be issued here immediately once all 5 desks complete sign-off.
+            </p>
+
+            <div style="background: #09090C; border: 1px solid var(--border-subtle); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span class="mono-label">CURRENT ACTIVE DESK</span>
+                <span class="mono-bold" style="color: var(--accent-volt);">${activeStep.fullName.toUpperCase()}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span class="mono-label">DESK IN-CHARGE</span>
+                <span style="color: var(--text-bone);">${activeStep.officerName}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <span class="mono-label">ELAPSED TIME AT DESK</span>
+                <span class="mono-bold" style="color: var(--text-bone);">${myReq.elapsedWait}</span>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+              <button class="btn-volt" onclick="window.clearPassApp.store.setView('student')">VIEW MY CLEARANCE RAIL ➔</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      this.renderApprovedPassArtifact(container, myReq, false);
+      return;
     }
 
-    // State A: If no target request found (Guest view or search not yet entered)
-    if (!targetReq) {
-      const isSearchFailed = !!lookup;
+    // SCENARIO 2: Public Verifier Mode (Guests / Officers / Admins)
+    const lookup = store.state.lookupHash ? store.state.lookupHash.trim().toUpperCase() : null;
+
+    if (!lookup) {
+      // Default Public Verifier state (Prompt user to scan QR or enter Protocol ID / Hash)
       container.innerHTML = `
         <div style="max-width: 660px; margin: 24px auto; background: #0E0E12; border: 1px solid var(--border-medium); padding: 32px 36px;">
           <div class="mono-label" style="color: var(--accent-volt); font-size: 11px; margin-bottom: 8px;">
-            [VVCE DIGITAL SECURITY PROTOCOL // PUBLIC VERIFIER]
+            [VVCE DIGITAL SECURITY PROTOCOL // PUBLIC QR VERIFIER]
           </div>
           <h2 style="font-family: var(--font-serif); font-size: 32px; color: var(--text-bone); margin-bottom: 8px; font-weight: 400;">
-            Cryptographic Credential Authenticator
+            Cryptographic Pass Authenticator
           </h2>
           <p style="font-size: 13px; color: var(--text-slate); line-height: 1.6; margin-bottom: 24px;">
-            Public cryptographic verifier for academic passes issued by Vidyavardhaka College of Engineering. Authenticate official clearance status by entering a Student USN or Protocol ID.
+            Public cryptographic validation portal for academic clearance passes issued by Vidyavardhaka College of Engineering. Authenticate official clearance passes by scanning the printed QR code or entering the unique Protocol ID / SHA-256 hash.
           </p>
 
-          ${isSearchFailed ? `
-            <div style="background: rgba(248, 113, 113, 0.1); border: 1px solid var(--state-rejected); padding: 12px 16px; margin-bottom: 20px; font-size: 12px; color: var(--state-rejected);">
-              <strong>VERIFICATION FAILED:</strong> No clearance pass found matching "<code>${lookup}</code>". Please check the USN or Protocol ID.
-            </div>
-          ` : ''}
-
-          <form id="form-public-verify" style="display: flex; gap: 8px; margin-bottom: 24px;">
+          <form id="form-public-verify" style="display: flex; gap: 8px; margin-bottom: 20px;">
             <input 
               type="text" 
               id="input-verify-search" 
               class="input-hairline" 
-              style="flex: 1; border: 1px solid var(--border-medium); padding: 10px 14px; font-family: var(--font-mono); font-size: 12px;" 
-              placeholder="Enter USN (e.g. 4VV24CI34) or Protocol ID (e.g. CP-2026-0719)..." 
-              value="${lookup || ''}"
+              style="flex: 1; border: 1px solid var(--border-medium); padding: 12px 14px; font-family: var(--font-mono); font-size: 12px;" 
+              placeholder="Enter Document Protocol ID (e.g. CP-2026-0719) or SHA-256 Hash..." 
               required
+              autocomplete="off"
             />
-            <button type="submit" class="btn-volt" style="white-space: nowrap; padding: 10px 20px;">
-              AUTHENTICATE ➔
+            <button type="submit" class="btn-volt" style="white-space: nowrap; padding: 12px 20px;">
+              AUTHENTICATE PASS ➔
             </button>
           </form>
 
-          <div style="border-top: 1px solid var(--border-subtle); padding-top: 20px;">
-            <div class="mono-label" style="color: var(--accent-volt); font-size: 10px; margin-bottom: 12px;">
-              VIVA DEMONSTRATION SAMPLES (CLICK TO AUDIT INSTANTLY):
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <div class="dossier-card" onclick="window.clearPassApp.store.setLookupHash('CP-2026-0719')">
-                <div>
-                  <div style="font-size: 13px; font-weight: 600; color: var(--text-bone);">Rajesh BR — Bonafide Certificate</div>
-                  <div class="mono-label" style="font-size: 10px; color: var(--text-slate);">USN: 4VV24CI34 · PROTOCOL: CP-2026-0719</div>
-                </div>
-                <span class="mono-label" style="color: var(--state-approved); font-size: 10px;">✓ APPROVED &amp; VERIFIED</span>
-              </div>
-
-              <div class="dossier-card" onclick="window.clearPassApp.store.setLookupHash('CP-2026-0690')">
-                <div>
-                  <div style="font-size: 13px; font-weight: 600; color: var(--text-bone);">RP Jeetender Singh — Lab Clearance</div>
-                  <div class="mono-label" style="font-size: 10px; color: var(--text-slate);">USN: 4VV24CI132 · PROTOCOL: CP-2026-0690</div>
-                </div>
-                <span class="mono-label" style="color: var(--state-approved); font-size: 10px;">✓ APPROVED &amp; VERIFIED</span>
-              </div>
-
-              <div class="dossier-card" onclick="window.clearPassApp.store.setLookupHash('CP-2026-0842')">
-                <div>
-                  <div style="font-size: 13px; font-weight: 600; color: var(--text-bone);">Vamshik Patela ES — Semester No-Dues</div>
-                  <div class="mono-label" style="font-size: 10px; color: var(--text-slate);">USN: 4VV24CI175 · PROTOCOL: CP-2026-0842</div>
-                </div>
-                <span class="mono-label" style="color: var(--accent-volt); font-size: 10px;">● IN PROGRESS (AT ACCOUNTS)</span>
-              </div>
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 18px; display: flex; align-items: flex-start; gap: 12px;">
+            <span style="color: var(--accent-volt); font-size: 14px;">🔒</span>
+            <div style="font-size: 12px; color: var(--text-slate); line-height: 1.5;">
+              <strong>Tamper-Proof Verification Standard:</strong> Only officially issued passes bearing final HOD sanction and immutable SHA-256 digital signatures can be authenticated. To protect student privacy, public verification requires the exact Protocol ID from the student's physical or digital pass.
             </div>
           </div>
         </div>
@@ -1289,57 +1288,75 @@ class ClearPassUI {
       return;
     }
 
-    // State B: Request exists but is IN PROGRESS (Not yet fully signed off)
-    if (targetReq.status === 'in_progress') {
-      const activeStep = targetReq.steps.find(s => s.status === 'active') || targetReq.steps[0];
+    // A lookup has been requested: Strictly find approved requests matching Protocol ID or Hash
+    const targetReq = store.state.requests.find(r => 
+      r.status === 'approved' && (
+        r.id.toUpperCase() === lookup ||
+        (r.certificateHash && r.certificateHash.toUpperCase() === lookup)
+      )
+    );
+
+    if (!targetReq) {
+      // Lookup failed: Show clean error prompt without leaking any internal data
       container.innerHTML = `
         <div style="max-width: 660px; margin: 24px auto; background: #0E0E12; border: 1px solid var(--border-medium); padding: 32px 36px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <div class="mono-label" style="color: var(--accent-volt); font-size: 11px;">[CLEARANCE IN PROGRESS]</div>
-            <button class="review-badge-btn" onclick="window.clearPassApp.store.setLookupHash(null)">← LOOKUP ANOTHER</button>
+            <div class="mono-label" style="color: var(--state-rejected); font-size: 11px;">[AUTHENTICATION FAILED]</div>
+            <button class="review-badge-btn" onclick="window.clearPassApp.store.setLookupHash(null)">← CLEAR SEARCH</button>
           </div>
 
-          <h2 style="font-family: var(--font-serif); font-size: 28px; color: var(--text-bone); margin-bottom: 8px; font-weight: 400;">
-            Certificate Pending Final Sign-Off
-          </h2>
-          <p style="font-size: 13px; color: var(--text-slate); line-height: 1.6; margin-bottom: 24px;">
-            The clearance dossier for <strong>${targetReq.studentName} (${targetReq.usn})</strong> is actively in route across department desks. A tamper-proof SHA-256 certificate and QR seal will be cryptographically minted once all 5 desks complete sign-off.
-          </p>
-
-          <div style="background: #09090C; border: 1px solid var(--border-subtle); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: space-between; font-size: 12px;">
-              <span class="mono-label">CURRENT ACTIVE DESK</span>
-              <span class="mono-bold" style="color: var(--accent-volt);">${activeStep.fullName.toUpperCase()}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px;">
-              <span class="mono-label">DESK IN-CHARGE</span>
-              <span style="color: var(--text-bone);">${activeStep.officerName}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 12px;">
-              <span class="mono-label">ELAPSED TIME AT DESK</span>
-              <span class="mono-bold" style="color: var(--text-bone);">${targetReq.elapsedWait}</span>
-            </div>
+          <div style="background: rgba(248, 113, 113, 0.08); border: 1px solid var(--state-rejected); padding: 14px 18px; margin-bottom: 24px;">
+            <div class="mono-label" style="color: var(--state-rejected); font-size: 11px; margin-bottom: 6px;">VERIFICATION FAILED: UNRECOGNIZED OR UNISSUED PASS</div>
+            <p style="font-size: 12px; color: var(--text-bone); line-height: 1.5; margin: 0;">
+              No authentic academic clearance certificate exists matching identifier "<code>${lookup}</code>". Either the Protocol ID is incorrect or the clearance is still in progress and has not yet received cryptographic sanction.
+            </p>
           </div>
 
-          <div style="display: flex; gap: 12px; justify-content: flex-end;">
-            ${store.state.currentRole === 'student' ? `
-              <button class="btn-volt" onclick="window.clearPassApp.store.setView('student')">VIEW MY CLEARANCE RAIL ➔</button>
-            ` : `
-              <button class="btn-stark" onclick="window.clearPassApp.store.setLookupHash('CP-2026-0719')">VIEW SAMPLE APPROVED PASS (RAJESH BR) ➔</button>
-            `}
-          </div>
+          <form id="form-public-verify" style="display: flex; gap: 8px; margin-bottom: 20px;">
+            <input 
+              type="text" 
+              id="input-verify-search" 
+              class="input-hairline" 
+              style="flex: 1; border: 1px solid var(--border-medium); padding: 12px 14px; font-family: var(--font-mono); font-size: 12px;" 
+              placeholder="Enter Document Protocol ID (e.g. CP-2026-0719) or SHA-256 Hash..." 
+              value="${lookup}"
+              required
+              autocomplete="off"
+            />
+            <button type="submit" class="btn-volt" style="white-space: nowrap; padding: 12px 20px;">
+              RETRY ➔
+            </button>
+          </form>
         </div>
       `;
+
+      const searchForm = container.querySelector('#form-public-verify');
+      if (searchForm) {
+        searchForm.onsubmit = (e) => {
+          e.preventDefault();
+          const val = document.getElementById('input-verify-search').value.trim();
+          if (val) store.setLookupHash(val);
+        };
+      }
       return;
     }
 
-    // State C: Request is APPROVED — Render Authentic A24 Boarding Pass Certificate
+    // Lookup succeeded: Render authentic certificate pass
+    this.renderApprovedPassArtifact(container, targetReq, true);
+  }
+
+  // Helper method: Renders the A24 Boarding Pass Certificate
+  renderApprovedPassArtifact(container, targetReq, isPublicMode) {
     const verifyUrl = `https://clearpass-phi.vercel.app/?verify=${targetReq.id}`;
     const qrSvg = generatePureSVGQRCode(verifyUrl, 120);
 
     container.innerHTML = `
       <div style="max-width: 640px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center;">
-        <button class="review-badge-btn" onclick="window.clearPassApp.store.setLookupHash(null)">← LOOKUP ANOTHER DOCUMENT</button>
+        ${isPublicMode ? `
+          <button class="review-badge-btn" onclick="window.clearPassApp.store.setLookupHash(null)">← VERIFY ANOTHER DOCUMENT</button>
+        ` : `
+          <button class="review-badge-btn" onclick="window.clearPassApp.store.setView('student')">← BACK TO MY CLEARANCE RAIL</button>
+        `}
         <button class="btn-volt" onclick="window.print()" style="font-size: 11px; padding: 6px 14px;">PRINT / DOWNLOAD PDF ➔</button>
       </div>
 
@@ -1372,7 +1389,7 @@ class ClearPassUI {
           <span style="font-size: 11px;">PASS // 2026-27</span>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 140px; gap: 20px; align-items: center;">
+        <div style="display: grid; grid-template-columns: 1fr 140px; gap: 20px; align-items: center;" class="pass-cred-grid">
           <div style="display: flex; flex-direction: column; gap: 12px;">
             <div>
               <span class="mono-label">STUDENT CREDENTIAL</span>
