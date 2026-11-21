@@ -322,6 +322,16 @@ body {
   transform: scale(0.97);
 }
 
+.btn-volt.pulse-ready {
+  animation: voltPulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 15px rgba(232, 255, 71, 0.45);
+}
+
+@keyframes voltPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(232, 255, 71, 0.3); }
+  50% { transform: scale(1.015); box-shadow: 0 0 18px rgba(232, 255, 71, 0.6); }
+}
+
 .btn-stark {
   background: transparent;
   color: var(--text-bone);

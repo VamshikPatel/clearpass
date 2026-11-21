@@ -186,10 +186,18 @@ class StateStore {
   }
 
   // Explicit Student Authentication
-  loginStudent(usn) {
+  loginStudent(usn, pin) {
+    if (!usn || !usn.trim()) {
+      window.clearPassApp.showToast('AUTHENTICATION FAILED: USN is required.');
+      return false;
+    }
     const student = STUDENTS.find(s => s.usn.toUpperCase() === usn.trim().toUpperCase());
     if (!student) {
-      window.clearPassApp.showToast(`ERROR: Student USN '${usn}' not found in VVCE AIML Registry.`);
+      window.clearPassApp.showToast(`ACCESS DENIED: Student USN '${usn}' not found in VVCE AIML Registry.`);
+      return false;
+    }
+    if (pin && student.pin && pin.trim() !== student.pin) {
+      window.clearPassApp.showToast(`ACCESS DENIED: Invalid Security PIN for ${student.name}.`);
       return false;
     }
 
@@ -198,13 +206,18 @@ class StateStore {
     this.state.currentView = 'student';
     this.state.lookupHash = null; // Clear lookup hash so student sees THEIR OWN certificate
     this.save();
-    window.clearPassApp.showToast(`WELCOME: ${student.name} (${student.usn})`);
+    window.clearPassApp.showToast(`VERIFIED: Signed in as ${student.name} (${student.usn})`);
     return true;
   }
 
   // Explicit Officer Authentication
-  loginOfficer(deskId) {
+  loginOfficer(deskId, pin) {
     const desk = OFFICER_DESKS.find(d => d.id === deskId) || OFFICER_DESKS[0];
+    if (pin && pin.trim() !== desk.pin && pin.trim() !== 'vvce#faculty') {
+      window.clearPassApp.showToast(`ACCESS DENIED: Invalid Faculty Clearance PIN for ${desk.name}.`);
+      return false;
+    }
+
     this.state.currentRole = 'officer';
     this.state.currentOfficerDesk = desk.id;
     this.state.currentUser = {
@@ -215,12 +228,17 @@ class StateStore {
     };
     this.state.currentView = 'officer';
     this.save();
-    window.clearPassApp.showToast(`SIGNED IN: ${desk.name} (${desk.officerName})`);
+    window.clearPassApp.showToast(`VERIFIED: Authorized as ${desk.name} (${desk.officerName})`);
     return true;
   }
 
   // Explicit Admin Authentication
-  loginAdmin() {
+  loginAdmin(token) {
+    if (token && token.trim() !== 'vvce#admin#2026') {
+      window.clearPassApp.showToast('ACCESS DENIED: Invalid Institutional Master Token.');
+      return false;
+    }
+
     this.state.currentRole = 'admin';
     this.state.currentUser = {
       name: 'Dean of Academic Affairs',
@@ -229,7 +247,7 @@ class StateStore {
     };
     this.state.currentView = 'admin';
     this.save();
-    window.clearPassApp.showToast('SIGNED IN: Institutional Administration Console');
+    window.clearPassApp.showToast('VERIFIED: Institutional Administration Console Authenticated');
     return true;
   }
 
@@ -379,55 +397,28 @@ function generateCryptographicHash(str) {
 }
 
 // Zero-Dependency Pure SVG QR Code Generator
-function generatePureSVGQRCode(data, size = 120) {
-  const matrixSize = 25;
-  const matrix = Array.from({ length: matrixSize }, () => Array(matrixSize).fill(false));
-
-  function drawFinder(r0, c0) {
-    for (let r = 0; r < 7; r++) {
-      for (let c = 0; c < 7; c++) {
-        if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
-          matrix[r0 + r][c0 + c] = true;
+// Authentic ISO/IEC 18004 Standard Vector QR Code Generator (Camera Scannable)
+function generatePureSVGQRCode(data, size = 130) {
+  if (typeof window !== 'undefined' && window.QRCodeGenerator && window.QRCodeGenerator.createSVG) {
+    try {
+      return window.QRCodeGenerator.createSVG(data, {
+        width: size,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
         }
-      }
+      });
+    } catch (e) {
+      console.warn('QRCodeGenerator error:', e);
     }
   }
 
-  drawFinder(0, 0);
-  drawFinder(0, matrixSize - 7);
-  drawFinder(matrixSize - 7, 0);
-
-  for (let i = 8; i < matrixSize - 8; i++) {
-    matrix[6][i] = (i % 2 === 0);
-    matrix[i][6] = (i % 2 === 0);
-  }
-
-  let idx = 0;
-  for (let r = 0; r < matrixSize; r++) {
-    for (let c = 0; c < matrixSize; c++) {
-      const inFinder = (r < 8 && c < 8) || (r < 8 && c >= matrixSize - 8) || (r >= matrixSize - 8 && c < 8);
-      const inTiming = r === 6 || c === 6;
-      if (!inFinder && !inTiming) {
-        const charVal = data.charCodeAt(idx % data.length);
-        matrix[r][c] = ((charVal + r * 5 + c * 3) % 2 === 0);
-        idx++;
-      }
-    }
-  }
-
-  const cellSize = (size / matrixSize).toFixed(2);
-  let rects = '';
-  for (let r = 0; r < matrixSize; r++) {
-    for (let c = 0; c < matrixSize; c++) {
-      if (matrix[r][c]) {
-        rects += `<rect x="${(c * cellSize)}" y="${(r * cellSize)}" width="${cellSize}" height="${cellSize}" fill="#F4F3EF" />`;
-      }
-    }
-  }
-
+  // Graceful fallback while module loads
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="background: #08080A; border: 1px solid rgba(255,255,255,0.14);">
-      ${rects}
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <rect width="${size}" height="${size}" fill="#ffffff" />
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="10" fill="#000000">QR LOADING...</text>
     </svg>
   `;
 }
@@ -444,9 +435,89 @@ class ClearPassUI {
   }
 
   init() {
+    // 1. Check if opened via QR Scan Link (?verify=... or ?id=...)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const verifyId = urlParams.get('verify') || urlParams.get('id') || urlParams.get('hash');
+      if (verifyId) {
+        store.state.lookupHash = verifyId.trim();
+        store.state.currentView = 'verify';
+      }
+    } catch (e) {
+      console.warn('URL parameter parsing error:', e);
+    }
+
     this.bindGlobalEvents();
     this.render();
     store.subscribe(() => this.render());
+  }
+
+  // Pre-fill student credentials into form (Prevents dangerous instant bypass)
+  populateStudentCredentials(usn) {
+    const student = STUDENTS.find(s => s.usn === usn);
+    if (!student) return;
+
+    const usnInput = document.getElementById('login-input-usn');
+    const pinInput = document.getElementById('login-input-pin');
+    if (usnInput) usnInput.value = student.usn;
+    if (pinInput) pinInput.value = student.pin;
+
+    document.querySelectorAll('#view-login .dossier-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.usn === usn);
+    });
+
+    const submitBtn = document.getElementById('btn-submit-student-login');
+    if (submitBtn) {
+      submitBtn.classList.remove('pulse-ready');
+      void submitBtn.offsetWidth;
+      submitBtn.classList.add('pulse-ready');
+      submitBtn.focus();
+    }
+
+    this.showToast(`CREDENTIALS LOADED: ${student.name} (${student.usn}). Click Sign In to authenticate.`);
+  }
+
+  // Pre-fill officer desk and PIN into form
+  populateOfficerCredentials(deskId) {
+    const desk = OFFICER_DESKS.find(d => d.id === deskId);
+    if (!desk) return;
+
+    const select = document.getElementById('login-select-desk');
+    const pinInput = document.getElementById('login-input-officer-pin');
+    if (select) select.value = desk.id;
+    if (pinInput) pinInput.value = desk.pin;
+
+    document.querySelectorAll('#view-login .dossier-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.desk === deskId);
+    });
+
+    const submitBtn = document.getElementById('btn-submit-officer-login');
+    if (submitBtn) {
+      submitBtn.classList.remove('pulse-ready');
+      void submitBtn.offsetWidth;
+      submitBtn.classList.add('pulse-ready');
+      submitBtn.focus();
+    }
+
+    this.showToast(`DESK SELECTED: ${desk.name}. Click Sign In to authenticate.`);
+  }
+
+  // Pre-fill administrative credentials into form
+  populateAdminCredentials() {
+    const adminIdInput = document.getElementById('login-input-admin-id');
+    const tokenInput = document.getElementById('login-input-admin-token');
+    if (adminIdInput) adminIdInput.value = 'DEAN-ACADEMICS-VVCE';
+    if (tokenInput) tokenInput.value = 'vvce#admin#2026';
+
+    const submitBtn = document.getElementById('btn-submit-admin-login');
+    if (submitBtn) {
+      submitBtn.classList.remove('pulse-ready');
+      void submitBtn.offsetWidth;
+      submitBtn.classList.add('pulse-ready');
+      submitBtn.focus();
+    }
+
+    this.showToast(`ADMIN TOKENS LOADED. Click Sign In to authenticate.`);
   }
 
   bindGlobalEvents() {
@@ -679,20 +750,23 @@ class ClearPassUI {
             <span class="field-label">Student Security PIN / Password</span>
             <input type="password" id="login-input-pin" class="input-hairline" value="vvce@2026" required />
           </div>
-          <button type="submit" class="btn-volt" style="width: 100%; margin-top: 4px;">
+          <button type="submit" id="btn-submit-student-login" class="btn-volt" style="width: 100%; margin-top: 4px;">
             SIGN IN TO STUDENT PORTAL ➔
           </button>
         </form>
 
-        <!-- One-Click Demo Profiles for Viva -->
+        <!-- Test Dossiers: Pre-fills Credentials for Viva Examination -->
         <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <span class="mono-label" style="color: var(--accent-volt);">VIVA DEMO PROFILES (CLICK TO SIGN IN INSTANTLY)</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="mono-label" style="color: var(--accent-volt);">EXAMINATION DEMO PROFILES</span>
+            <span class="mono-label" style="color: var(--text-slate); font-size: 9px;">CLICK CARD TO PRE-FILL FORM</span>
+          </div>
           <div class="quick-dossier-list" style="margin-top: 8px;">
             ${STUDENTS.map(s => {
               const req = store.state.requests.find(r => r.usn === s.usn);
               const statusTag = req ? (req.status === 'approved' ? '✓ APPROVED CERTIFICATE' : `WAITING AT ${req.activeDesk ? req.activeDesk.toUpperCase() : 'DESK'}`) : 'NO ACTIVE REQUEST';
               return `
-                <div class="dossier-card" onclick="window.clearPassApp.store.loginStudent('${s.usn}')">
+                <div class="dossier-card" data-usn="${s.usn}" onclick="window.clearPassApp.populateStudentCredentials('${s.usn}')" title="Click to load ${s.name}'s credentials into login form">
                   <div>
                     <div class="dossier-name">${s.name}</div>
                     <div class="mono-label" style="font-size: 10px;">${s.dept} · SEM ${s.sem} · SEC ${s.sec}</div>
@@ -713,7 +787,8 @@ class ClearPassUI {
         form.onsubmit = (e) => {
           e.preventDefault();
           const usn = document.getElementById('login-input-usn').value;
-          store.loginStudent(usn);
+          const pin = document.getElementById('login-input-pin').value;
+          store.loginStudent(usn, pin);
         };
       }
     } else if (currentTab === 'officer') {
@@ -733,17 +808,20 @@ class ClearPassUI {
             <span class="field-label">Faculty Clearance PIN / Access Token</span>
             <input type="password" id="login-input-officer-pin" class="input-hairline" value="vvce#faculty" required />
           </div>
-          <button type="submit" class="btn-volt" style="width: 100%; margin-top: 4px;">
+          <button type="submit" id="btn-submit-officer-login" class="btn-volt" style="width: 100%; margin-top: 4px;">
             SIGN IN TO DEPARTMENT QUEUE ➔
           </button>
         </form>
 
         <!-- Department Desks Quick Select -->
         <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <span class="mono-label" style="color: var(--accent-volt);">OFFICIAL CLEARANCE DESKS (CLICK TO SIGN IN)</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="mono-label" style="color: var(--accent-volt);">OFFICIAL CLEARANCE DESKS</span>
+            <span class="mono-label" style="color: var(--text-slate); font-size: 9px;">CLICK CARD TO PRE-FILL DESK & PIN</span>
+          </div>
           <div class="quick-dossier-list" style="margin-top: 8px;">
             ${OFFICER_DESKS.map(d => `
-              <div class="dossier-card" onclick="window.clearPassApp.store.loginOfficer('${d.id}')">
+              <div class="dossier-card" data-desk="${d.id}" onclick="window.clearPassApp.populateOfficerCredentials('${d.id}')" title="Click to select ${d.name} in login form">
                 <div>
                   <div class="dossier-name"><span class="mono-label" style="color: var(--accent-volt); margin-right: 6px;">${d.tag}</span>${d.name}</div>
                   <div class="mono-label" style="font-size: 10px;">${d.officerName} · ${d.roleTitle}</div>
@@ -760,7 +838,8 @@ class ClearPassUI {
         form.onsubmit = (e) => {
           e.preventDefault();
           const deskId = document.getElementById('login-select-desk').value;
-          store.loginOfficer(deskId);
+          const pin = document.getElementById('login-input-officer-pin').value;
+          store.loginOfficer(deskId, pin);
         };
       }
     } else if (currentTab === 'admin') {
@@ -768,19 +847,23 @@ class ClearPassUI {
         <form id="form-login-admin" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-field-group">
             <span class="field-label">Institutional Administrative ID</span>
-            <input type="text" class="input-hairline" value="DEAN-ACADEMICS-VVCE" readonly />
+            <input type="text" id="login-input-admin-id" class="input-hairline" value="DEAN-ACADEMICS-VVCE" readonly />
           </div>
           <div class="form-field-group">
             <span class="field-label">Master Security Token</span>
-            <input type="password" class="input-hairline" value="vvce#admin#2026" required />
+            <input type="password" id="login-input-admin-token" class="input-hairline" value="vvce#admin#2026" required />
           </div>
-          <button type="submit" class="btn-volt" style="width: 100%; margin-top: 4px;">
+          <button type="submit" id="btn-submit-admin-login" class="btn-volt" style="width: 100%; margin-top: 4px;">
             SIGN IN TO AUDIT CONSOLE ➔
           </button>
         </form>
 
         <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <div class="dossier-card" onclick="window.clearPassApp.store.loginAdmin()">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="mono-label" style="color: var(--accent-volt);">ADMINISTRATIVE CELL</span>
+            <span class="mono-label" style="color: var(--text-slate); font-size: 9px;">CLICK CARD TO PRE-FILL</span>
+          </div>
+          <div class="dossier-card" onclick="window.clearPassApp.populateAdminCredentials()" title="Click to pre-fill admin tokens">
             <div>
               <div class="dossier-name"><span class="mono-label" style="color: var(--accent-volt); margin-right: 6px;">[ADMIN // AUDIT]</span>Dean of Academic Affairs & Principal Office</div>
               <div class="mono-label" style="font-size: 10px;">VVCE Institutional Audit & Delay Monitoring</div>
@@ -794,7 +877,8 @@ class ClearPassUI {
       if (form) {
         form.onsubmit = (e) => {
           e.preventDefault();
-          store.loginAdmin();
+          const token = document.getElementById('login-input-admin-token').value;
+          store.loginAdmin(token);
         };
       }
     }
@@ -943,7 +1027,8 @@ class ClearPassUI {
   }
 
   renderArtifactDrawerHTML(req) {
-    const qrSvg = generatePureSVGQRCode(`VVCE://CLEARPASS/VERIFY/${req.certificateHash}`, 110);
+    const verifyUrl = `https://clearpass-phi.vercel.app/?verify=${req.id}`;
+    const qrSvg = generatePureSVGQRCode(verifyUrl, 100);
 
     return `
       <div class="artifact-card-wrap">
@@ -1000,7 +1085,9 @@ class ClearPassUI {
 
           <div class="cert-a24-footer">
             <div style="display: flex; align-items: center; gap: 16px;">
-              <div>${qrSvg}</div>
+              <div style="background: #ffffff; padding: 5px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center;">
+                ${qrSvg}
+              </div>
               <div>
                 <span class="mono-label">CRYPTOGRAPHIC DIGEST (SHA-256)</span>
                 <div class="mono-label" style="color: var(--text-bone); font-size: 10px; max-width: 280px; word-break: break-all; margin-top: 4px;">
@@ -1351,7 +1438,8 @@ class ClearPassUI {
     }
 
     // State C: Request is APPROVED — Render Authentic A24 Boarding Pass Certificate
-    const qrSvg = generatePureSVGQRCode(`VVCE://CLEARPASS/VERIFY/${targetReq.certificateHash}`, 140);
+    const verifyUrl = `https://clearpass-phi.vercel.app/?verify=${targetReq.id}`;
+    const qrSvg = generatePureSVGQRCode(verifyUrl, 120);
 
     container.innerHTML = `
       <div style="max-width: 640px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center;">
@@ -1402,7 +1490,14 @@ class ClearPassUI {
               </div>
             </div>
           </div>
-          <div>${qrSvg}</div>
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+            <div style="background: #ffffff; padding: 6px; border-radius: 4px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); display: flex; align-items: center; justify-content: center;">
+              ${qrSvg}
+            </div>
+            <a href="${verifyUrl}" target="_blank" class="mono-label" style="font-size: 8px; color: var(--accent-volt); text-decoration: underline; letter-spacing: 0.05em; text-align: center;">
+              SCAN / VERIFY ONLINE ↗
+            </a>
+          </div>
         </div>
 
         <div class="pass-audit-trail">
