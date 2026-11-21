@@ -196,7 +196,7 @@ class StateStore {
       window.clearPassApp.showToast(`ACCESS DENIED: Student USN '${usn}' not found in VVCE AIML Registry.`);
       return false;
     }
-    if (pin && student.pin && pin.trim() !== student.pin) {
+    if (!pin || !pin.trim() || pin.trim() !== student.pin) {
       window.clearPassApp.showToast(`ACCESS DENIED: Invalid Security PIN for ${student.name}.`);
       return false;
     }
@@ -212,8 +212,16 @@ class StateStore {
 
   // Explicit Officer Authentication
   loginOfficer(deskId, pin) {
-    const desk = OFFICER_DESKS.find(d => d.id === deskId) || OFFICER_DESKS[0];
-    if (pin && pin.trim() !== desk.pin && pin.trim() !== 'vvce#faculty') {
+    if (!deskId) {
+      window.clearPassApp.showToast('AUTHENTICATION FAILED: Please select your Department Desk.');
+      return false;
+    }
+    const desk = OFFICER_DESKS.find(d => d.id === deskId);
+    if (!desk) {
+      window.clearPassApp.showToast('ACCESS DENIED: Department desk not recognized.');
+      return false;
+    }
+    if (!pin || !pin.trim() || (pin.trim() !== desk.pin && pin.trim() !== 'vvce#faculty')) {
       window.clearPassApp.showToast(`ACCESS DENIED: Invalid Faculty Clearance PIN for ${desk.name}.`);
       return false;
     }
@@ -233,9 +241,21 @@ class StateStore {
   }
 
   // Explicit Admin Authentication
-  loginAdmin(token) {
-    if (token && token.trim() !== 'vvce#admin#2026') {
-      window.clearPassApp.showToast('ACCESS DENIED: Invalid Institutional Master Token.');
+  loginAdmin(adminId, token) {
+    let id = adminId;
+    let pass = token;
+    if (token === undefined) {
+      pass = adminId;
+      id = 'DEAN-ACADEMICS-VVCE';
+    }
+
+    if (!id || id.trim().toUpperCase() !== 'DEAN-ACADEMICS-VVCE') {
+      window.clearPassApp.showToast('ACCESS DENIED: Institutional Admin ID not recognized.');
+      return false;
+    }
+
+    if (!pass || !pass.trim() || pass.trim() !== 'vvce#admin#2026') {
+      window.clearPassApp.showToast('ACCESS DENIED: Invalid Master Security Token.');
       return false;
     }
 
@@ -450,74 +470,6 @@ class ClearPassUI {
     this.bindGlobalEvents();
     this.render();
     store.subscribe(() => this.render());
-  }
-
-  // Pre-fill student credentials into form (Prevents dangerous instant bypass)
-  populateStudentCredentials(usn) {
-    const student = STUDENTS.find(s => s.usn === usn);
-    if (!student) return;
-
-    const usnInput = document.getElementById('login-input-usn');
-    const pinInput = document.getElementById('login-input-pin');
-    if (usnInput) usnInput.value = student.usn;
-    if (pinInput) pinInput.value = student.pin;
-
-    document.querySelectorAll('#view-login .dossier-card').forEach(card => {
-      card.classList.toggle('selected', card.dataset.usn === usn);
-    });
-
-    const submitBtn = document.getElementById('btn-submit-student-login');
-    if (submitBtn) {
-      submitBtn.classList.remove('pulse-ready');
-      void submitBtn.offsetWidth;
-      submitBtn.classList.add('pulse-ready');
-      submitBtn.focus();
-    }
-
-    this.showToast(`CREDENTIALS LOADED: ${student.name} (${student.usn}). Click Sign In to authenticate.`);
-  }
-
-  // Pre-fill officer desk and PIN into form
-  populateOfficerCredentials(deskId) {
-    const desk = OFFICER_DESKS.find(d => d.id === deskId);
-    if (!desk) return;
-
-    const select = document.getElementById('login-select-desk');
-    const pinInput = document.getElementById('login-input-officer-pin');
-    if (select) select.value = desk.id;
-    if (pinInput) pinInput.value = desk.pin;
-
-    document.querySelectorAll('#view-login .dossier-card').forEach(card => {
-      card.classList.toggle('selected', card.dataset.desk === deskId);
-    });
-
-    const submitBtn = document.getElementById('btn-submit-officer-login');
-    if (submitBtn) {
-      submitBtn.classList.remove('pulse-ready');
-      void submitBtn.offsetWidth;
-      submitBtn.classList.add('pulse-ready');
-      submitBtn.focus();
-    }
-
-    this.showToast(`DESK SELECTED: ${desk.name}. Click Sign In to authenticate.`);
-  }
-
-  // Pre-fill administrative credentials into form
-  populateAdminCredentials() {
-    const adminIdInput = document.getElementById('login-input-admin-id');
-    const tokenInput = document.getElementById('login-input-admin-token');
-    if (adminIdInput) adminIdInput.value = 'DEAN-ACADEMICS-VVCE';
-    if (tokenInput) tokenInput.value = 'vvce#admin#2026';
-
-    const submitBtn = document.getElementById('btn-submit-admin-login');
-    if (submitBtn) {
-      submitBtn.classList.remove('pulse-ready');
-      void submitBtn.offsetWidth;
-      submitBtn.classList.add('pulse-ready');
-      submitBtn.focus();
-    }
-
-    this.showToast(`ADMIN TOKENS LOADED. Click Sign In to authenticate.`);
   }
 
   bindGlobalEvents() {
@@ -741,64 +693,39 @@ class ClearPassUI {
 
     if (currentTab === 'student') {
       container.innerHTML = `
-        <form id="form-login-student" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="form-login-student" style="display: flex; flex-direction: column; gap: 16px;">
           <div class="form-field-group">
             <span class="field-label">Student University Seat Number (USN)</span>
-            <input type="text" id="login-input-usn" class="input-hairline" value="4VV24CI175" placeholder="e.g. 4VV24CI175" required />
+            <input type="text" id="login-input-usn" class="input-hairline" placeholder="Enter University Seat Number (e.g. 4VV24CI175)" required autocomplete="username" />
           </div>
           <div class="form-field-group">
             <span class="field-label">Student Security PIN / Password</span>
-            <input type="password" id="login-input-pin" class="input-hairline" value="vvce@2026" required />
+            <input type="password" id="login-input-pin" class="input-hairline" placeholder="Enter Student Security PIN" required autocomplete="current-password" />
           </div>
-          <button type="submit" id="btn-submit-student-login" class="btn-volt" style="width: 100%; margin-top: 4px;">
+          <button type="submit" id="btn-submit-student-login" class="btn-volt" style="width: 100%; margin-top: 6px;">
             SIGN IN TO STUDENT PORTAL ➔
           </button>
         </form>
-
-        <!-- Test Dossiers: Pre-fills Credentials for Viva Examination -->
-        <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span class="mono-label" style="color: var(--accent-volt);">EXAMINATION DEMO PROFILES</span>
-            <span class="mono-label" style="color: var(--text-slate); font-size: 9px;">CLICK CARD TO PRE-FILL FORM</span>
-          </div>
-          <div class="quick-dossier-list" style="margin-top: 8px;">
-            ${STUDENTS.map(s => {
-              const req = store.state.requests.find(r => r.usn === s.usn);
-              const statusTag = req ? (req.status === 'approved' ? '✓ APPROVED CERTIFICATE' : `WAITING AT ${req.activeDesk ? req.activeDesk.toUpperCase() : 'DESK'}`) : 'NO ACTIVE REQUEST';
-              return `
-                <div class="dossier-card" data-usn="${s.usn}" onclick="window.clearPassApp.populateStudentCredentials('${s.usn}')" title="Click to load ${s.name}'s credentials into login form">
-                  <div>
-                    <div class="dossier-name">${s.name}</div>
-                    <div class="mono-label" style="font-size: 10px;">${s.dept} · SEM ${s.sem} · SEC ${s.sec}</div>
-                  </div>
-                  <div style="text-align: right;">
-                    <div class="dossier-usn">${s.usn}</div>
-                    <div class="mono-label" style="font-size: 9px; color: ${req && req.status === 'approved' ? 'var(--state-approved)' : 'var(--accent-volt)'};">${statusTag}</div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
       `;
 
       const form = container.querySelector('#form-login-student');
       if (form) {
         form.onsubmit = (e) => {
           e.preventDefault();
-          const usn = document.getElementById('login-input-usn').value;
-          const pin = document.getElementById('login-input-pin').value;
+          const usn = document.getElementById('login-input-usn').value.trim();
+          const pin = document.getElementById('login-input-pin').value.trim();
           store.loginStudent(usn, pin);
         };
       }
     } else if (currentTab === 'officer') {
       container.innerHTML = `
-        <form id="form-login-officer" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="form-login-officer" style="display: flex; flex-direction: column; gap: 16px;">
           <div class="form-field-group">
             <span class="field-label">Select Department Clearance Desk</span>
             <select id="login-select-desk" class="select-hairline" required>
+              <option value="" disabled selected>-- Select Department Clearance Desk --</option>
               ${OFFICER_DESKS.map(d => `
-                <option value="${d.id}" ${store.state.currentOfficerDesk === d.id ? 'selected' : ''}>
+                <option value="${d.id}">
                   ${d.tag} ${d.name} (${d.officerName})
                 </option>
               `).join('')}
@@ -806,79 +733,48 @@ class ClearPassUI {
           </div>
           <div class="form-field-group">
             <span class="field-label">Faculty Clearance PIN / Access Token</span>
-            <input type="password" id="login-input-officer-pin" class="input-hairline" value="vvce#faculty" required />
+            <input type="password" id="login-input-officer-pin" class="input-hairline" placeholder="Enter Faculty Clearance PIN / Token" required autocomplete="current-password" />
           </div>
-          <button type="submit" id="btn-submit-officer-login" class="btn-volt" style="width: 100%; margin-top: 4px;">
+          <button type="submit" id="btn-submit-officer-login" class="btn-volt" style="width: 100%; margin-top: 6px;">
             SIGN IN TO DEPARTMENT QUEUE ➔
           </button>
         </form>
-
-        <!-- Department Desks Quick Select -->
-        <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span class="mono-label" style="color: var(--accent-volt);">OFFICIAL CLEARANCE DESKS</span>
-            <span class="mono-label" style="color: var(--text-slate); font-size: 9px;">CLICK CARD TO PRE-FILL DESK & PIN</span>
-          </div>
-          <div class="quick-dossier-list" style="margin-top: 8px;">
-            ${OFFICER_DESKS.map(d => `
-              <div class="dossier-card" data-desk="${d.id}" onclick="window.clearPassApp.populateOfficerCredentials('${d.id}')" title="Click to select ${d.name} in login form">
-                <div>
-                  <div class="dossier-name"><span class="mono-label" style="color: var(--accent-volt); margin-right: 6px;">${d.tag}</span>${d.name}</div>
-                  <div class="mono-label" style="font-size: 10px;">${d.officerName} · ${d.roleTitle}</div>
-                </div>
-                <div class="mono-label" style="color: var(--accent-volt); font-size: 10px;">${d.id.toUpperCase()}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
       `;
 
       const form = container.querySelector('#form-login-officer');
       if (form) {
         form.onsubmit = (e) => {
           e.preventDefault();
-          const deskId = document.getElementById('login-select-desk').value;
-          const pin = document.getElementById('login-input-officer-pin').value;
+          const deskSelect = document.getElementById('login-select-desk');
+          const deskId = deskSelect ? deskSelect.value : '';
+          const pin = document.getElementById('login-input-officer-pin').value.trim();
           store.loginOfficer(deskId, pin);
         };
       }
     } else if (currentTab === 'admin') {
       container.innerHTML = `
-        <form id="form-login-admin" style="display: flex; flex-direction: column; gap: 14px;">
+        <form id="form-login-admin" style="display: flex; flex-direction: column; gap: 16px;">
           <div class="form-field-group">
             <span class="field-label">Institutional Administrative ID</span>
-            <input type="text" id="login-input-admin-id" class="input-hairline" value="DEAN-ACADEMICS-VVCE" readonly />
+            <input type="text" id="login-input-admin-id" class="input-hairline" placeholder="Institutional Admin ID (e.g. DEAN-ACADEMICS-VVCE)" required autocomplete="username" />
           </div>
           <div class="form-field-group">
             <span class="field-label">Master Security Token</span>
-            <input type="password" id="login-input-admin-token" class="input-hairline" value="vvce#admin#2026" required />
+            <input type="password" id="login-input-admin-token" class="input-hairline" placeholder="Enter Master Security Token" required autocomplete="current-password" />
           </div>
-          <button type="submit" id="btn-submit-admin-login" class="btn-volt" style="width: 100%; margin-top: 4px;">
+          <button type="submit" id="btn-submit-admin-login" class="btn-volt" style="width: 100%; margin-top: 6px;">
             SIGN IN TO AUDIT CONSOLE ➔
           </button>
         </form>
-
-        <div style="margin-top: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span class="mono-label" style="color: var(--accent-volt);">ADMINISTRATIVE CELL</span>
-            <span class="mono-label" style="color: var(--text-slate); font-size: 9px;">CLICK CARD TO PRE-FILL</span>
-          </div>
-          <div class="dossier-card" onclick="window.clearPassApp.populateAdminCredentials()" title="Click to pre-fill admin tokens">
-            <div>
-              <div class="dossier-name"><span class="mono-label" style="color: var(--accent-volt); margin-right: 6px;">[ADMIN // AUDIT]</span>Dean of Academic Affairs & Principal Office</div>
-              <div class="mono-label" style="font-size: 10px;">VVCE Institutional Audit & Delay Monitoring</div>
-            </div>
-            <div class="mono-label" style="color: var(--accent-volt); font-size: 10px;">ADMIN</div>
-          </div>
-        </div>
       `;
 
       const form = container.querySelector('#form-login-admin');
       if (form) {
         form.onsubmit = (e) => {
           e.preventDefault();
-          const token = document.getElementById('login-input-admin-token').value;
-          store.loginAdmin(token);
+          const adminId = document.getElementById('login-input-admin-id') ? document.getElementById('login-input-admin-id').value.trim() : '';
+          const token = document.getElementById('login-input-admin-token').value.trim();
+          store.loginAdmin(adminId, token);
         };
       }
     }

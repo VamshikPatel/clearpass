@@ -87,3 +87,39 @@
 2. **Full-Stack Method:**
    - Double-click `run_clearpass.bat` or run `python server.py`.
    - Opens at `http://localhost:5000` with the SQLite database backend.
+3. **Live Production URL:**
+   - `https://clearpass-phi.vercel.app` (Fully responsive, works on phone and laptop).
+
+---
+
+## 7. Viva Demonstration Credentials Cheat-Sheet (Confidential / Team Only)
+
+> [!NOTE]
+> All public demo buttons and auto-fills have been removed from the login screen for production security compliance. Use the credentials below to demonstrate to the evaluation committee:
+
+### 🎓 Student Portal Logins:
+- **Vamshik Patela ES:**
+  - **USN:** `4VV24CI175`
+  - **PIN:** `vvce@2026`
+  - *Status:* In-progress clearance request currently waiting at Accounts & Fee Section (Desk 03).
+- **Rajesh BR:**
+  - **USN:** `4VV24CI34`
+  - **PIN:** `vvce@2026`
+  - *Status:* Approved Bonafide Certificate with full 5-desk signatures and scannable QR code.
+- **RP Jeetender Singh:**
+  - **USN:** `4VV24CI132`
+  - **PIN:** `vvce@2026`
+  - *Status:* Approved Laboratory Clearance certificate with tamper-proof SHA-256 seal.
+
+### 🏛️ Department Clearance Desks (Officer Portal):
+- Select Desk from dropdown, then enter the Faculty PIN (`vvce#faculty` works for all desks, or use desk-specific PIN):
+  - **Central Library:** `Dr H Nayana (Chief Librarian)` | PIN: `vvce#lib`
+  - **Campus Hostel Office:** `Girish P (Hostel Warden)` | PIN: `vvce#hostel`
+  - **Accounts & Fee Section:** `Accounts Officer (Desk 3)` | PIN: `vvce#acc`
+  - **AIML Department Labs:** `Prof Rashmi K (Lab In-charge)` | PIN: `vvce#lab`
+  - **HOD Office (AIML):** `Dr Aditya CR (Prof & HOD)` | PIN: `vvce#hod`
+
+### 🛡️ Administrative Audit Console:
+- **Admin ID:** `DEAN-ACADEMICS-VVCE`
+- **Master Security Token:** `vvce#admin#2026`
+- *Access:* Institutional SLA bottleneck metrics, SDG-12 paperless audits, and student clearance logs.
